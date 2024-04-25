@@ -18,7 +18,8 @@
     "react-native-splash-screen": "^3.3.0",
     "react-native-svg": "^12.1.1",
     "react-native-svg-transformer": "^1.0.0",
-    "react-native-webview": "^12.0.2"
+    "react-native-webview": "^12.0.2",
+    "una": "^0.4.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
