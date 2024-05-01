@@ -65,7 +65,7 @@ import { version } from './package.json';
 
 type Props = {};
 
-const BASE_URL = 'https://unacms.com/'; // site URL
+const BASE_URL = 'https://srv463925.hstgr.cloud/'; // site URL
 const MIX_LIGHT = '0'; // template styles mix for light mode
 const MIX_DARK = '0'; // template styles mix for dark mode
 const TEMPLATE = 'artificer'; // template name
