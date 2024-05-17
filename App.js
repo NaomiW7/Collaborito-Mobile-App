@@ -9,6 +9,7 @@
 import React, { Component } from 'react';
 import OneSignal from 'react-native-onesignal';
 import SplashScreen from 'react-native-splash-screen';
+import Swiper from 'react-native-deck-swiper';
 import { WebView } from 'react-native-webview';
 import {
     Platform,
@@ -90,6 +91,12 @@ const requestPermissions = async () => {
     }
 };
 
+function * range (start, end) {
+    for (let i = start; i <= end; i++) {
+      yield i
+    }
+}
+
 export default class App extends Component<Props> {
 
     loading = false;
@@ -117,6 +124,11 @@ export default class App extends Component<Props> {
             videoCallUri: false,
             colorScheme: colorScheme,
             drawerOpen: false,
+            cards: [...range(1, 50)],
+            //cards: ['DO', 'MORE', 'OF', 'WHAT', 'MAKES', 'YOU', 'HAPPY'],
+            swipedAllCards: false,
+            swipeDirection: '',
+            cardIndex: 0
         };
 
         this.onBack = this.onBack.bind(this);
@@ -138,6 +150,29 @@ export default class App extends Component<Props> {
 
         this.onDrawerToggle = this.onDrawerToggle.bind(this);
     }
+
+    renderCard = (card, index) => {
+        return (
+          <View style={styles.card}>
+            <Text style={styles.text}>This is</Text>
+            <Text style={styles.text}>card # {card}</Text>
+          </View>
+        )
+    };
+    
+    onSwiped = (type) => {
+        console.log(`on swiped ${type}`)
+    }
+    
+    onSwipedAllCards = () => {
+        this.setState({
+          swipedAllCards: true
+        })
+    };
+    
+    swipeLeft = () => {
+        this.swiper.swipeLeft()
+    };
 /*
     async onRequestPurchase (sku: string) {
         if ('ios' === Platform.OS)
@@ -647,6 +682,104 @@ export default class App extends Component<Props> {
                 />
         );
 
+        var sSwiper = (
+            <View style={styles.container}>
+              <Swiper
+                ref={swiper => {
+                  this.swiper = swiper
+                }}
+                onSwiped={() => this.onSwiped('general')}
+                onSwipedLeft={() => this.onSwiped('left')}
+                onSwipedRight={() => this.onSwiped('right')}
+                onSwipedTop={() => this.onSwiped('top')}
+                onSwipedBottom={() => this.onSwiped('bottom')}
+                onTapCard={this.swipeLeft}
+                cards={this.state.cards}
+                cardIndex={this.state.cardIndex}
+                cardVerticalMargin={100}
+                renderCard={this.renderCard}
+                onSwipedAll={this.onSwipedAllCards}
+                stackSize={3}
+                stackSeparation={1}
+                overlayLabels={{
+                  bottom: {
+                    title: 'BLEAH',
+                    style: {
+                      label: {
+                        backgroundColor: 'black',
+                        borderColor: 'black',
+                        color: 'white',
+                        borderWidth: 1
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }
+                    }
+                  },
+                  left: {
+                    title: 'NOPE',
+                    style: {
+                      label: {
+                        backgroundColor: 'black',
+                        borderColor: 'black',
+                        color: 'white',
+                        borderWidth: 1
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-start',
+                        marginTop: 30,
+                        marginLeft: -30
+                      }
+                    }
+                  },
+                  right: {
+                    title: 'LIKE',
+                    style: {
+                      label: {
+                        backgroundColor: 'black',
+                        borderColor: 'black',
+                        color: 'white',
+                        borderWidth: 1
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-start',
+                        marginTop: 30,
+                        marginLeft: 30
+                      }
+                    }
+                  },
+                  top: {
+                    title: 'SUPER LIKE',
+                    style: {
+                      label: {
+                        backgroundColor: 'black',
+                        borderColor: 'black',
+                        color: 'white',
+                        borderWidth: 1
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }
+                    }
+                  }
+                }}
+                animateOverlayLabelsOpacity
+                animateCardOpacity
+                swipeBackCard
+              >
+                <Button onPress={() => this.swiper.swipeBack()} title='Swipe Back' />
+              </Swiper>
+            </View>
+          )
+
         return (
             <NativeBaseProvider> 
                 <StatusBar animated={true} backgroundColor={useTheme('colors.statusBar')} barStyle={useTheme('barStyle')} />
@@ -663,7 +796,10 @@ export default class App extends Component<Props> {
                     <View />
                 )}
 
-                {sWebview}
+                {false ? (sWebview) : 
+                (<View />)}
+
+                {sSwiper}
 
                 { this.state.drawerOpen ? <UnaDrawer onLogin={this.onDrawerLoginMenu.bind(this)} onJoin={this.onDrawerJoinMenu.bind(this)} onForotPassword={this.onDrawerForgotMenu.bind(this)} onClose={this.drawerClose.bind(this)} /> : <View /> }
 
@@ -769,7 +905,7 @@ function UnaDrawer(o) {
                 <Pressable style={styles.drawerButton} iconLeft transparent onPress={o.onLogin}>
                     <HStack>
                         <Icons.In size="md" color={useTheme('colors.drawerText')} style={styles.drawerButtonIcon} />
-                        <Text fontSize="md" color={useTheme('colors.drawerText')} style={styles.drawerButtonText}>Login</Text>
+                        <Text fontSize="md" color={useTheme('colors.drawerText')} style={styles.drawerButtonText}>Loginn</Text>
                     </HStack>
                 </Pressable>
                 <Pressable style={styles.drawerButton} iconLeft transparent onPress={o.onJoin}>
@@ -872,4 +1008,27 @@ const styles = new StyleSheet.create({
         fontSize: 11, 
         fontWeight: 'bold',
     },
+    container: {
+        flex: 1,
+        backgroundColor: '#F5FCFF'
+    },
+    card: {
+        flex: 1,
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: '#E8E8E8',
+        justifyContent: 'center',
+        backgroundColor: 'white'
+    },
+    text: {
+        textAlign: 'center',
+        fontSize: 10,
+        backgroundColor: 'transparent'
+    },
+    done: {
+        textAlign: 'center',
+        fontSize: 30,
+        color: 'white',
+        backgroundColor: 'transparent'
+    }
 });
