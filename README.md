@@ -84,3 +84,32 @@ npx react-native set-splash --platform ios --path ./img/background.png --resize 
 ```
 After images are generated rename it back `ios/kookaburra` to `ios/una`.
 Then open `kookaburra.xcworkspace` in XCode and add `SplashScreen.storyboard` file to the project to use it as splash.
+
+
+
+# Steps to generate APK installer.
+
+## Bundle your js:
+
+- if you have index.android.js in project root then run
+
+```bash
+  react-native bundle --dev false --platform android --entry-file index.android.js --bundle-output ./android/app/build/intermediates/assets/debug/index.android.bundle --assets-dest ./android/app/build/intermediates/res/merged/debug
+```
+
+- if you have index.js in project root then run
+
+```bash
+react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+```
+
+## Create debug apk:
+
+```bash
+cd android/
+.\gradlew assembleDebug
+Then You can find your apk here:
+```
+```bash
+cd app/build/outputs/apk/
+```
