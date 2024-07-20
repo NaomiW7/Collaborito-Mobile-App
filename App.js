@@ -70,7 +70,7 @@ const BASE_URL = 'https://srv463925.hstgr.cloud/'; // site URL
 const MIX_LIGHT = '0'; // template styles mix for light mode
 const MIX_DARK = '0'; // template styles mix for dark mode
 const TEMPLATE = 'artificer'; // template name
-const TITLE = 'UNA CMS | Community Management System'; // homepage title
+const TITLE = 'Collaborito| callaborito.com'; // homepage title
 const ONESIGNALAPPID = ''; // you can obtain one from https://onesignal.com/
 const PAYMENTS_CALLBACK = ''; // empty string means payment functionality is disabled
 
