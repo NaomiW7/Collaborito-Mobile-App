@@ -121,6 +121,7 @@ export default class App extends Component<Props> {
             searchbar: false,
             key: 1,
             videoCall: 0,
+            swiperView: 0,
             videoCallUri: false,
             colorScheme: colorScheme,
             drawerOpen: false,
@@ -136,6 +137,7 @@ export default class App extends Component<Props> {
         this.onBackAndMainMenu = this.onBackAndMainMenu.bind(this);
         this.onSearchMenu = this.onSearchMenu.bind(this);
         this.onNotificationsMenu = this.onNotificationsMenu.bind(this);
+        this.onSwiperView = this.onSwiperView.bind(this);
         this.onAddMenu = this.onAddMenu.bind(this);
         this.onMessengerMenu = this.onMessengerMenu.bind(this);
         this.onProfileMenu = this.onProfileMenu.bind(this);
@@ -154,8 +156,8 @@ export default class App extends Component<Props> {
     renderCard = (card, index) => {
         return (
           <View style={styles.card}>
-            <Text style={styles.text}>This is</Text>
-            <Text style={styles.text}>card # {card}</Text>
+            <Text style={styles.largeText}>User profile </Text>
+            <Text style={styles.largeText}> # {card}</Text>
           </View>
         )
     };
@@ -216,7 +218,13 @@ export default class App extends Component<Props> {
             videoCallUri: false,
         });
         //JitsiMeet.endCall();
-    }    
+    } 
+    
+    endSwiperView() {
+        this.setState ({
+            swiperView: 0,
+        });
+    }
 
     onVideoCallStart(sUri, bAudioOnly = false) {
         if (!this.state.videoCall) {
@@ -239,6 +247,7 @@ export default class App extends Component<Props> {
 
     onBack() {
         this.endVideoCall();
+        this.endSwiperView();
         if (this.state.backButtonEnabled) {
     
             if ('android' === Platform.OS)
@@ -253,6 +262,7 @@ export default class App extends Component<Props> {
     
     onMainMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         if (this.state.data.loggedin)
             this.injectJavaScript("bx_mobile_apps_show_main_menu()");
         else
@@ -270,30 +280,44 @@ export default class App extends Component<Props> {
 
     onProfileMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         this.injectJavaScript("bx_mobile_apps_show_profile_menu()");
+        return true;
+    }
+
+
+    onSwiperView() {
+        this.endVideoCall();
+        this.setState ({
+            swiperView: 1,
+        });
         return true;
     }
 
     onAddMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         this.injectJavaScript("bx_mobile_apps_show_add_menu()");
         return true;
     }
     
     onNotificationsMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         this.injectJavaScript(`document.location = "${BASE_URL}page.php?i=notifications-view"`);
         return true;
     }
     
     onMessengerMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         this.injectJavaScript("bx_mobile_apps_show_messenger_menu()");
         return true;
     }
     
     onHomeMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         if (`${BASE_URL}` == this.url || this.url.startsWith(`${BASE_URL}?skin=${TEMPLATE}`) || `${BASE_URL}index.php` == this.url) {        
             this.injectJavaScript("bx_mobile_apps_close_sliding_menus()");
         } else {
@@ -323,6 +347,7 @@ export default class App extends Component<Props> {
 
     onSearchMenu() {
         this.endVideoCall();
+        this.endSwiperView();
         this.setState ({
             loading: this.loading,
             searchbar: true,
@@ -683,7 +708,7 @@ export default class App extends Component<Props> {
         );
 
         var sSwiper = (
-            <View style={styles.container}>
+            <View style={styles.containerVideoCall}>
               <Swiper
                 ref={swiper => {
                   this.swiper = swiper
@@ -703,7 +728,7 @@ export default class App extends Component<Props> {
                 stackSeparation={1}
                 overlayLabels={{
                   bottom: {
-                    title: 'BLEAH',
+                    title: 'NO NO',
                     style: {
                       label: {
                         backgroundColor: 'black',
@@ -784,11 +809,12 @@ export default class App extends Component<Props> {
             <NativeBaseProvider> 
                 <StatusBar animated={true} backgroundColor={useTheme('colors.statusBar')} barStyle={useTheme('barStyle')} />
 
-                {this.state.searchbar ? (
+                {/* this.state.searchbar ? (
                     <UnaToolbarSearch onSearch={this.onSearch} onSearchCancel={this.onSearchCancelMenu} />
                 ) : (
                     <UnaToolbar drawerOpen={this.state.drawerOpen} loading={this.state.loading} loggedin={this.state.data.loggedin} backButtonEnabled={this.state.backButtonEnabled} onMainMenu={this.onMainMenu} onHomeMenu={this.onHomeMenu} onSearchMenu={this.onSearchMenu} onBackAndMainMenu={this.onBackAndMainMenu} onBack={this.onBack} onDrawerToggle={this.onDrawerToggle} title={this.state.status} />
-                ) }
+                ) */}
+
 
                 {this.state.videoCall && this.state.videoCallUri ? (
                     <View style={styles.containerVideoCall}><VideoCall onConferenceTerminated={this.onConferenceTerminated} onConferenceJoined={this.onConferenceJoined} onConferenceWillJoin={this.onConferenceWillJoin} conferenceUri={this.state.videoCallUri} audio={this.videoCallAudio} userInfo={this.state.data.user_info} /></View>
@@ -796,16 +822,18 @@ export default class App extends Component<Props> {
                     <View />
                 )}
 
-                {false ? (sWebview) : 
+                {this.state.swiperView ? (sSwiper) : 
                 (<View />)}
 
-                {sSwiper}
+                {true ? (sWebview) : 
+                (<View />)}
 
                 { this.state.drawerOpen ? <UnaDrawer onLogin={this.onDrawerLoginMenu.bind(this)} onJoin={this.onDrawerJoinMenu.bind(this)} onForotPassword={this.onDrawerForgotMenu.bind(this)} onClose={this.drawerClose.bind(this)} /> : <View /> }
 
                 {this.state.data.loggedin && (
-                    <UnaFooter bubblesNum={this.state.data.bubbles_num} bubbles={this.state.data.bubbles} onMainMenu={this.onMainMenu} onNotificationsMenu={this.onNotificationsMenu} onVideoCallToggle={this.onVideoCallToggle} onRequestPurchase={this.onRequestPurchase} onRequestSubscription={this.onRequestSubscription} onAddMenu={this.onAddMenu} onMessengerMenu={this.onMessengerMenu} onProfileMenu={this.onProfileMenu} />
+                    <UnaFooter bubblesNum={this.state.data.bubbles_num} bubbles={this.state.data.bubbles} onMainMenu={this.onMainMenu} onNotificationsMenu={this.onNotificationsMenu} onVideoCallToggle={this.onVideoCallToggle} onRequestPurchase={this.onRequestPurchase} onRequestSubscription={this.onRequestSubscription} onSwiperView={this.onSwiperView} onAddMenu={this.onAddMenu} onMessengerMenu={this.onMessengerMenu} onProfileMenu={this.onProfileMenu} />
                 )}
+                
             </NativeBaseProvider>
         );
     }
@@ -829,13 +857,20 @@ function UnaFooter(o) {
                     <Center><IconButton icon={<Icons.Video size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onVideoCallToggle} /></Center>
                 </Pressable>
 */}
+
+                <Pressable py="3" flex={1} style={styles.footerTab}>
+                    <IconButton icon={<Icons.Question size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onSwiperView} />
+                </Pressable>
+
                 <Pressable py="3" flex={1} style={styles.footerTab}>
                     <IconButton icon={<Icons.Plus size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onAddMenu} />
                 </Pressable>
+{/*                
                 <Pressable py="3" flex={1} style={styles.footerTab}>                    
                     <IconButton icon={<Icons.Chat size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onMessengerMenu} />
                     {o.bubbles['notifications-messenger'] > 0 && (<Badge num={o.bubbles['notifications-messenger']} />)}
                 </Pressable>
+*/}
                 <Pressable py="3" flex={1} style={styles.footerTab}>
                     <IconButton icon={<Icons.User size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onProfileMenu} />
                     {o.bubbles['account'] > 0 && (<Badge num={o.bubbles['account']} />)}
@@ -1023,6 +1058,11 @@ const styles = new StyleSheet.create({
     text: {
         textAlign: 'center',
         fontSize: 10,
+        backgroundColor: 'transparent'
+    },
+    largeText: {
+        textAlign: 'center',
+        fontSize: 20,
         backgroundColor: 'transparent'
     },
     done: {
