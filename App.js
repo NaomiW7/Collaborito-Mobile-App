@@ -11,6 +11,7 @@ import OneSignal from 'react-native-onesignal';
 import SplashScreen from 'react-native-splash-screen';
 import Swiper from 'react-native-deck-swiper';
 import { WebView } from 'react-native-webview';
+
 import {
     Platform,
     StyleSheet,
@@ -21,6 +22,8 @@ import {
     Appearance,
     PermissionsAndroid,
     NativeModules,
+    TextInput, //TODO:
+    ScrollView,//TODO:
 } from 'react-native';
 import {
     Link,
@@ -46,6 +49,7 @@ import {
 } from 'native-base';
 import NativeBaseIcon from './src/components/NativeBaseIcon';
 import { Path, G } from "react-native-svg";
+
 
 /*
 import RNIap, {
@@ -74,6 +78,61 @@ const TITLE = 'Collaborito| callaborito.com'; // homepage title
 const ONESIGNALAPPID = ''; // you can obtain one from https://onesignal.com/
 const PAYMENTS_CALLBACK = ''; // empty string means payment functionality is disabled
 
+//todo: questionnarie - handle input change - handle submit - return
+const Questionnaire = ({ onClose }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        age: '',
+        gender: '',
+        location: '',
+        jobTitle: '',
+        socialUrls: '',
+        networkingNeeds: '',
+        skillsRequired: '',
+        experienceRequired: '',
+        timeCommitment: '',
+        collaborationPreferences: '',
+        projectDescription: '',
+        projectIndustry: '',
+        interests: ''
+    });
+
+    const handleInputChange = (field, value) => {
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            [field]: value
+        }));
+    };
+
+    const handleSubmit = () => {
+        // For now, just log the answers to the console
+        console.log(formData);
+        // TODO: Handle form submission, e.g., send answers to a server
+        if (onClose) {
+            onClose();
+        }
+    };
+
+    return (
+        <ScrollView contentContainerStyle={styles.container}>
+            {Object.keys(formData).map((field) => (
+                <View key={field} style={styles.inputContainer}>
+                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={formData[field]}
+                        onChangeText={(value) => handleInputChange(field, value)}
+                    />
+                </View>
+            ))}
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+        </ScrollView>
+    );
+};
+
+
 const requestPermissions = async () => {
     try {
         const oGranted = await PermissionsAndroid.requestMultiple([
@@ -82,7 +141,7 @@ const requestPermissions = async () => {
             PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
         ]);
-        
+
         for (const [sKey, sValue] of Object.entries(oGranted)) {
             console.log(`Permission - ${sKey}: ${sValue}`);
         }
@@ -129,7 +188,11 @@ export default class App extends Component<Props> {
             //cards: ['DO', 'MORE', 'OF', 'WHAT', 'MAKES', 'YOU', 'HAPPY'],
             swipedAllCards: false,
             swipeDirection: '',
-            cardIndex: 0
+            cardIndex: 0,
+            //TODO: 2. have showQuestionnaire in state in the constructor
+            showQuestionnaire: false, //todo: Controls the visibility of the questionnaire
+            questionnaireData: [],     //todo: Holds the questionnaire data
+            userResponses: {},          // todo: Stores user responses
         };
 
         this.onBack = this.onBack.bind(this);
@@ -151,7 +214,54 @@ export default class App extends Component<Props> {
         this.onVideoCallStart = this.onVideoCallStart.bind(this);
 
         this.onDrawerToggle = this.onDrawerToggle.bind(this);
+        //TODO: Binding methods...
+        this.handleQuestionnaireResponse = this.handleQuestionnaireResponse.bind(this);
+        this.renderQuestionnaire = this.renderQuestionnaire.bind(this);//todo:
     }
+
+    //TODO: 5.load the questionnaire data
+    componentDidMount() {
+            this.loadQuestionnaireData();
+        }
+
+        loadQuestionnaireData = () => {
+            // Example of loading data (replace with actual data source)
+            const data = [
+                { id: 1, question: 'What is your favorite color?', options: ['Red', 'Blue', 'Green'] },
+                // Add more questions here
+            ];
+            this.setState({ questionnaireData: data });
+        }
+
+    //TODO: 3.Create a method to render the questionnaire
+    renderQuestionnaire() {
+            return (
+//                <View style={styles.container}>
+//                    {this.state.questionnaireData.map((item) => (
+//                        <View key={item.id} style={styles.questionCard}>
+//                            <Text>{item.question}</Text>
+//                            {item.options.map(option => (
+//                                <Button
+//                                    key={option}
+//                                    title={option}
+//                                    onPress={() => this.handleQuestionnaireResponse(item.id, option)}
+//                                />
+//                            ))}
+//                        </View>
+//                    ))}
+//                </View>
+                 <Questionnaire
+                     data={this.state.questionnaireData}
+                     onClose={() => this.setState({ showQuestionnaire: false })}
+                 />
+            );
+        }
+
+        handleQuestionnaireResponse(questionId, response) {
+            this.setState(prevState => ({
+                userResponses: { ...prevState.userResponses, [questionId]: response }
+            }));
+        }
 
     renderCard = (card, index) => {
         return (
@@ -161,17 +271,23 @@ export default class App extends Component<Props> {
           </View>
         )
     };
-    
+
+
+    //TODO: questionnaire press
+    showQuestionnaire = () => {
+        this.setState({ showQuestionnaire: true });
+    }
+
     onSwiped = (type) => {
         console.log(`on swiped ${type}`)
     }
-    
+
     onSwipedAllCards = () => {
         this.setState({
           swipedAllCards: true
         })
     };
-    
+
     swipeLeft = () => {
         this.swiper.swipeLeft()
     };
@@ -190,7 +306,7 @@ export default class App extends Component<Props> {
     async onRequestSubscription (sku: string) {
         if ('ios' === Platform.OS)
             RNIap.clearTransactionIOS();
-        try {            
+        try {
             await RNIap.requestSubscription(sku);
         } catch (err) {
             console.warn(err.code, err.message);
@@ -199,7 +315,7 @@ export default class App extends Component<Props> {
     }
 */
     onConferenceTerminated(e) {
-        this.endVideoCall();        
+        this.endVideoCall();
         this.injectJavaScript("bx_mobile_apps_video_terminated(" + JSON.stringify(e.nativeEvent) + ")");
     }
 
@@ -218,8 +334,8 @@ export default class App extends Component<Props> {
             videoCallUri: false,
         });
         //JitsiMeet.endCall();
-    } 
-    
+    }
+
     endSwiperView() {
         this.setState ({
             swiperView: 0,
@@ -805,6 +921,9 @@ export default class App extends Component<Props> {
             </View>
           )
 
+        //TODO: 4.Integrate into Main Render Function
+        var sQuestionnaire = this.renderQuestionnaire();
+
         return (
             <NativeBaseProvider> 
                 <StatusBar animated={true} backgroundColor={useTheme('colors.statusBar')} barStyle={useTheme('barStyle')} />
@@ -822,6 +941,7 @@ export default class App extends Component<Props> {
                     <View />
                 )}
 
+                {this.state.showQuestionnaire ? (sQuestionnaire) : <View />} //TODO: 4-1 integrate to main render's return
                 {this.state.swiperView ? (sSwiper) : 
                 (<View />)}
 
@@ -874,6 +994,10 @@ function UnaFooter(o) {
                 <Pressable py="3" flex={1} style={styles.footerTab}>
                     <IconButton icon={<Icons.User size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onProfileMenu} />
                     {o.bubbles['account'] > 0 && (<Badge num={o.bubbles['account']} />)}
+                </Pressable>
+                //TODO: 1.Add Questionnaire Button to Footer
+                <Pressable py="3" flex={1} style={styles.footerTab}>
+                    <IconButton icon={<Icons.Question size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={props.onQuestionnaireToggle} />
                 </Pressable>
             </HStack>
     );
