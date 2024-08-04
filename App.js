@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import OneSignal from 'react-native-onesignal';
 import SplashScreen from 'react-native-splash-screen';
 import Swiper from 'react-native-deck-swiper';
@@ -24,6 +24,7 @@ import {
     NativeModules,
     TextInput, //TODO:
     ScrollView,//TODO:
+    TouchableOpacity,
 } from 'react-native';
 import {
     Link,
@@ -192,7 +193,7 @@ export default class App extends Component<Props> {
             //TODO: 2. have showQuestionnaire in state in the constructor
             showQuestionnaire: false, //todo: Controls the visibility of the questionnaire
             questionnaireData: [],     //todo: Holds the questionnaire data
-            userResponses: {},          // todo: Stores user responses
+            userResponses: {}          // todo: Stores user responses
         };
 
         this.onBack = this.onBack.bind(this);
@@ -250,18 +251,20 @@ export default class App extends Component<Props> {
 //                        </View>
 //                    ))}
 //                </View>
-                 <Questionnaire
+                <View style={styles.containerVideoCall}>
+                <Questionnaire
                      data={this.state.questionnaireData}
                      onClose={() => this.setState({ showQuestionnaire: false })}
-                 />
+                />
+                </View>
             );
-        }
+    }
 
-        handleQuestionnaireResponse(questionId, response) {
-            this.setState(prevState => ({
-                userResponses: { ...prevState.userResponses, [questionId]: response }
-            }));
-        }
+    handleQuestionnaireResponse(questionId, response) {
+        this.setState(prevState => ({
+            userResponses: { ...prevState.userResponses, [questionId]: response }
+        }));
+    }
 
     renderCard = (card, index) => {
         return (
@@ -940,8 +943,10 @@ export default class App extends Component<Props> {
                 ) : (
                     <View />
                 )}
-
-                {this.state.showQuestionnaire ? (sQuestionnaire) : <View />} //TODO: 4-1 integrate to main render's return
+{/*
+                //TODO: 4-1 integrate to main render's return
+*/}
+                {true ? (sQuestionnaire) : <View />} 
                 {this.state.swiperView ? (sSwiper) : 
                 (<View />)}
 
@@ -995,10 +1000,13 @@ function UnaFooter(o) {
                     <IconButton icon={<Icons.User size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onProfileMenu} />
                     {o.bubbles['account'] > 0 && (<Badge num={o.bubbles['account']} />)}
                 </Pressable>
+{/*
                 //TODO: 1.Add Questionnaire Button to Footer
+                Shiwen: let's not worry about adding this button for now.
                 <Pressable py="3" flex={1} style={styles.footerTab}>
                     <IconButton icon={<Icons.Question size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={props.onQuestionnaireToggle} />
                 </Pressable>
+*/}
             </HStack>
     );
 }
