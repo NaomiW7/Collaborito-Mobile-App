@@ -22,8 +22,8 @@ import {
     Appearance,
     PermissionsAndroid,
     NativeModules,
-    TextInput, //TODO:
-    ScrollView,//TODO:
+    TextInput,
+    ScrollView,
     TouchableOpacity,
 } from 'react-native';
 import {
@@ -115,7 +115,7 @@ const Questionnaire = ({ onClose }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
             {Object.keys(formData).map((field) => (
                 <View key={field} style={styles.inputContainer}>
                     <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
@@ -1109,6 +1109,12 @@ const styles = new StyleSheet.create({
         alignItems: 'center',
     },
 
+    scrollViewContent: {
+        flexGrow: 1,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center', // Optional: Center content if desired
+    },
+
     header: {
         height: 50,
     },
@@ -1179,6 +1185,7 @@ const styles = new StyleSheet.create({
         flex: 1,
         backgroundColor: '#F5FCFF'
     },
+
     card: {
         flex: 1,
         borderRadius: 4,
