@@ -98,6 +98,9 @@ const Questionnaire = ({ onClose }) => {
         interests: ''
     });
 
+    //TODO: add a const
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
     const handleInputChange = (field, value) => {
         setFormData(prevFormData => ({
             ...prevFormData,
@@ -114,24 +117,72 @@ const Questionnaire = ({ onClose }) => {
         }
     };
 
+    //Todo: split to page
+    const questions = Object.keys(formData);
+    const currentQuestion = questions[currentQuestionIndex];
+    const isLastQuestion = currentQuestionIndex === questions.length - 1;
+    const handleNext = () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (currentQuestionIndex > 0) {
+            setCurrentQuestionIndex(currentQuestionIndex - 1);
+        }
+    };
+
     return (
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {Object.keys(formData).map((field) => (
-                <View key={field} style={styles.inputContainer}>
-                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
+            <View style={styles.container}>
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>{currentQuestion.replace(/([A-Z])/g, ' $1').trim()}</Text>
                     <TextInput
                         style={styles.input}
-                        value={formData[field]}
-                        onChangeText={(value) => handleInputChange(field, value)}
+                        value={formData[currentQuestion]}
+                        onChangeText={(value) => handleInputChange(currentQuestion, value)}
+                        placeholder={`Enter ${currentQuestion.replace(/([A-Z])/g, ' $1').trim()}`}
+                        editable={true}
                     />
                 </View>
-            ))}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-        </ScrollView>
-    );
-};
+                <View style={styles.buttonContainer}>
+                    {currentQuestionIndex > 0 && (
+                        <TouchableOpacity style={styles.navigationButton} onPress={handlePrevious}>
+                            <Text style={styles.buttonText}>Previous</Text>
+                        </TouchableOpacity>
+                    )}
+                    {isLastQuestion ? (
+                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                            <Text style={styles.buttonText}>Submit</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity style={styles.navigationButton} onPress={handleNext}>
+                            <Text style={styles.buttonText}>Next</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
+//    return (
+//        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+//            {Object.keys(formData).map((field) => (
+//                <View key={field} style={styles.inputContainer}>
+//                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
+//                    <TextInput
+//                        style={styles.input}
+//                        value={formData[field]}
+//                        onChangeText={(value) => handleInputChange(field, value)}
+//                    />
+//                </View>
+//            ))}
+//            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+//                <Text style={styles.submitButtonText}>Submit</Text>
+//            </TouchableOpacity>
+//        </ScrollView>
+//    );
+//};
 
 
 const requestPermissions = async () => {
@@ -1103,17 +1154,65 @@ const styles = new StyleSheet.create({
         flex: 1,
         backgroundColor: 'transparent',
     },
+
+    inputContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    label: {
+        fontSize: 18,
+        marginBottom: 10,
+    },
+
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        fontSize: 18,
+        backgroundColor: 'white', // Ensure visibility
+        zIndex: 1, // Ensure the TextInput has a high zIndex
+    },
+    overlappingComponent: {
+            position: 'absolute',
+            zIndex: 2, // This component will be rendered on top
+        },
+
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    navigationButton: {
+        backgroundColor: '#007bff',
+        padding: 10,
+        borderRadius: 5,
+    },
+    submitButton: {
+        backgroundColor: '#28a745',
+        padding: 10,
+        borderRadius: 5,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+    },
+
     webviewFirstLoad: {
         flex: 9999999999,        
         justifyContent: 'center',  
         alignItems: 'center',
     },
 
-    scrollViewContent: {
-        flexGrow: 1,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'center', // Optional: Center content if desired
-    },
+//    scrollViewContent: {
+//        flexGrow: 1,
+//        backgroundColor: '#FFFFFF',
+//        justifyContent: 'center', // Optional: Center content if desired
+//    },
 
     header: {
         height: 50,
@@ -1129,6 +1228,7 @@ const styles = new StyleSheet.create({
 
     searchInputContainer: {
         paddingLeft:5,
+        marginBottom: 20,
     },
     searchInputItem: {        
         borderWidth: 1,
@@ -1183,7 +1283,8 @@ const styles = new StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: '#F5FCFF'
+        backgroundColor: '#F5FCFF',
+        padding: 20,
     },
 
     card: {
