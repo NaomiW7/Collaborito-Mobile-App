@@ -11,6 +11,7 @@ import OneSignal from 'react-native-onesignal';
 import SplashScreen from 'react-native-splash-screen';
 import Swiper from 'react-native-deck-swiper';
 import { WebView } from 'react-native-webview';
+import axios from 'axios';
 
 import {
     Platform,
@@ -71,7 +72,7 @@ import { version } from './package.json';
 
 type Props = {};
 
-const BASE_URL = 'https://srv463925.hstgr.cloud/'; // site URL
+const BASE_URL = 'https://collaborito.net/'; // site URL
 const MIX_LIGHT = '0'; // template styles mix for light mode
 const MIX_DARK = '0'; // template styles mix for dark mode
 const TEMPLATE = 'artificer'; // template name
@@ -109,6 +110,17 @@ const Questionnaire = ({ onClose }) => {
         // For now, just log the answers to the console
         console.log(formData);
         // TODO: Handle form submission, e.g., send answers to a server
+        //use axios for HTTP POST
+        const response = axios({
+            method: 'post',
+            url: 'http://10.0.2.2:5000/hello',
+            data: formData,
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+            },
+        });
+        /* const response = axios.get("http://10.0.2.2:5000/hello");
+        console.log(response.data) */
         if (onClose) {
             onClose();
         }
