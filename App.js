@@ -81,29 +81,105 @@ const ONESIGNALAPPID = ''; // you can obtain one from https://onesignal.com/
 const PAYMENTS_CALLBACK = ''; // empty string means payment functionality is disabled
 
 //todo: questionnarie - handle input change - handle submit - return
+
 const Questionnaire = ({ onClose }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        age: '',
-        gender: '',
-        location: '',
-        jobTitle: '',
-        socialUrls: '',
-        networkingNeeds: '',
-        skillsRequired: '',
-        experienceRequired: '',
-        timeCommitment: '',
-        collaborationPreferences: '',
+        firstName: '',
+        lastName: '',
+        city: '',
+        country: '',
+        introduction: '',
+        socialLinks: {
+            linkedin: '',
+            instagram: '',
+            facebook: '',
+            twitter: '',
+            youtube: ''
+        },
+        skills: '',
+        technical: '',
+        interests: '',
+        goals: '',
         projectDescription: '',
-        projectIndustry: '',
-        interests: ''
+        projectHelp: '',
+        contribution: ''
     });
 
-    const handleInputChange = (field, value) => {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            [field]: value
-        }));
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+    const questions = [
+        {
+            field: ['firstName', 'lastName'],
+            prompt: "What's your name?",
+            placeholders: ['First name', 'Last name']
+        },
+        {
+            field: ['city', 'country'],
+            prompt: "Where are you based?",
+            placeholders: ['City', 'Country']
+        },
+        {
+            field: 'introduction',
+            prompt: "Please introduce yourself in one sentence.",
+            placeholder: "E.g. I’m a musician and musical instrument repairer who’s passionate about music education."
+        },
+        {
+            field: 'socialLinks',
+            prompt: "Please enter any social media links you’d like to share.",
+            placeholders: ['LinkedIn', 'Instagram', 'Facebook', 'Twitter', 'YouTube']
+        },
+        {
+            field: 'skills',
+            prompt: "What are your skills?",
+            placeholder: "E.g. Accounting, AI, Marketing, etc."
+        },
+        {
+            field: 'technical',
+            prompt: "Are you technical?",
+            placeholder: "Yes or No"
+        },
+        {
+            field: 'interests',
+            prompt: "What topics are you interested in?",
+            placeholder: "E.g. Advertising, AI, Blockchain, etc."
+        },
+        {
+            field: 'goals',
+            prompt: "What are your goals?",
+            placeholder: "E.g. Find a co-founder, Help with a project, etc."
+        },
+        {
+            field: 'projectDescription',
+            prompt: "Please describe your project/idea in 1-2 sentences.",
+            placeholder: "E.g. A business collecting musical instruments and donating them to school children."
+        },
+        {
+            field: 'projectHelp',
+            prompt: "What kind of help are you looking for with your project/idea?",
+            placeholder: "E.g. Help with funding, marketing, etc."
+        },
+        {
+            field: 'contribution',
+            prompt: "How would you like to contribute to others’ projects?",
+            placeholder: "E.g. Full-Time Work, Mentorship, etc."
+        }
+    ];
+
+    const handleInputChange = (field, value, subfield) => {
+        if (subfield) {
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                [field]: {
+                    ...prevFormData[field],
+                    [subfield]: value
+                }
+            }));
+        } else {
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                [field]: value
+            }));
+        }
     };
 
     const handleSubmit = () => {
@@ -126,25 +202,93 @@ const Questionnaire = ({ onClose }) => {
         }
     };
 
+
+const handleNext = () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (currentQuestionIndex > 0) {
+            setCurrentQuestionIndex(currentQuestionIndex - 1);
+        }
+    };
+
+    const currentQuestion = questions[currentQuestionIndex];
+
     return (
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {Object.keys(formData).map((field) => (
-                <View key={field} style={styles.inputContainer}>
-                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <Text style={styles.label}>{currentQuestion.prompt}</Text>
+                {Array.isArray(currentQuestion.field) ? (
+                    currentQuestion.field.map((field, index) => (
+                        <TextInput
+                            key={field}
+                            style={styles.input}
+                            value={formData[field]}
+                            onChangeText={(value) => handleInputChange(field, value)}
+                            placeholder={currentQuestion.placeholders[index]}
+                        />
+                    ))
+                ) : currentQuestion.field === 'socialLinks' ? (
+                    Object.keys(formData.socialLinks).map((key) => (
+                        <TextInput
+                            key={key}
+                            style={styles.input}
+                            value={formData.socialLinks[key]}
+                            onChangeText={(value) => handleInputChange('socialLinks', value, key)}
+                            placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                        />
+                    ))
+                ) : (
                     <TextInput
                         style={styles.input}
-                        value={formData[field]}
-                        onChangeText={(value) => handleInputChange(field, value)}
+                        value={formData[currentQuestion.field]}
+                        onChangeText={(value) => handleInputChange(currentQuestion.field, value)}
+                        placeholder={currentQuestion.placeholder}
                     />
+                )}
+                <View style={styles.buttonContainer}>
+                    {currentQuestionIndex > 0 && (
+                        <TouchableOpacity style={styles.navButton} onPress={handlePrevious}>
+                            <Text style={styles.buttonText}>Back</Text>
+                        </TouchableOpacity>
+                    )}
+                    {currentQuestionIndex === questions.length - 1 ? (
+                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                            <Text style={styles.buttonText}>Submit</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity style={styles.navButton} onPress={handleNext}>
+                            <Text style={styles.buttonText}>Next</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
-            ))}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
-};
+ };
 
+
+//    return (
+//        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+//            {Object.keys(formData).map((field) => (
+//                <View key={field} style={styles.inputContainer}>
+//                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
+//                    <TextInput
+//                        style={styles.input}
+//                        value={formData[field]}
+//                        onChangeText={(value) => handleInputChange(field, value)}
+//                    />
+//                </View>
+//            ))}
+//            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+//                <Text style={styles.submitButtonText}>Submit</Text>
+//            </TouchableOpacity>
+//        </ScrollView>
+//    );
+//};
 
 const requestPermissions = async () => {
     try {
@@ -721,7 +865,7 @@ export default class App extends Component<Props> {
             this.purchaseErrorSubscription = null;
         }
 
-        if (Platform.OS === 'android') {
+        if (Platform.OS === 'android' && this.backHandler) {
             this.backHandler.remove();
         }
     }
@@ -1121,11 +1265,51 @@ const styles = new StyleSheet.create({
         alignItems: 'center',
     },
 
-    scrollViewContent: {
+//    scrollViewContent: {
+//        flexGrow: 1,
+//        backgroundColor: '#FFFFFF',
+//        justifyContent: 'center', // Optional: Center content if desired
+//    },
+    scrollContainer: {
         flexGrow: 1,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'center', // Optional: Center content if desired
+        justifyContent: 'center',
     },
+
+     label: {
+        fontSize: 18,
+        marginBottom: 10,
+     },
+
+     input: {
+         borderWidth: 1,
+         borderColor: '#ccc',
+         borderRadius: 5,
+         padding: 10,
+         fontSize: 18,
+         backgroundColor: 'white',
+         marginBottom: 20,
+     },
+
+     buttonContainer: {
+         flexDirection: 'row',
+         justifyContent: 'space-between',
+     },
+
+     navButton: {
+         backgroundColor: '#007bff',
+         padding: 10,
+         borderRadius: 5,
+     },
+     submitButton: {
+         backgroundColor: '#28a745',
+         padding: 10,
+         borderRadius: 5,
+     },
+     buttonText: {
+         color: '#fff',
+         fontSize: 18,
+     },
+
 
     header: {
         height: 50,
@@ -1195,7 +1379,8 @@ const styles = new StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: '#F5FCFF'
+        backgroundColor: '#F5FCFF',
+        padding: 20
     },
 
     card: {
