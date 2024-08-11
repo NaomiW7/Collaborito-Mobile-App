@@ -6,11 +6,13 @@
  * @flow strict-local
  */
 
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import OneSignal from 'react-native-onesignal';
 import SplashScreen from 'react-native-splash-screen';
 import Swiper from 'react-native-deck-swiper';
 import { WebView } from 'react-native-webview';
+import axios from 'axios';
+
 import {
     Platform,
     StyleSheet,
@@ -21,6 +23,9 @@ import {
     Appearance,
     PermissionsAndroid,
     NativeModules,
+    TextInput,
+    ScrollView,
+    TouchableOpacity,
 } from 'react-native';
 import {
     Link,
@@ -47,6 +52,7 @@ import {
 import NativeBaseIcon from './src/components/NativeBaseIcon';
 import { Path, G } from "react-native-svg";
 
+
 /*
 import RNIap, {
   purchaseErrorListener,
@@ -66,13 +72,79 @@ import { version } from './package.json';
 
 type Props = {};
 
-const BASE_URL = 'https://srv463925.hstgr.cloud/'; // site URL
+const BASE_URL = 'https://collaborito.net/'; // site URL
 const MIX_LIGHT = '0'; // template styles mix for light mode
 const MIX_DARK = '0'; // template styles mix for dark mode
 const TEMPLATE = 'artificer'; // template name
 const TITLE = 'Collaborito| callaborito.com'; // homepage title
 const ONESIGNALAPPID = ''; // you can obtain one from https://onesignal.com/
 const PAYMENTS_CALLBACK = ''; // empty string means payment functionality is disabled
+
+//todo: questionnarie - handle input change - handle submit - return
+const Questionnaire = ({ onClose }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        age: '',
+        gender: '',
+        location: '',
+        jobTitle: '',
+        socialUrls: '',
+        networkingNeeds: '',
+        skillsRequired: '',
+        experienceRequired: '',
+        timeCommitment: '',
+        collaborationPreferences: '',
+        projectDescription: '',
+        projectIndustry: '',
+        interests: ''
+    });
+
+    const handleInputChange = (field, value) => {
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            [field]: value
+        }));
+    };
+
+    const handleSubmit = () => {
+        // For now, just log the answers to the console
+        console.log(formData);
+        // TODO: Handle form submission, e.g., send answers to a server
+        //use axios for HTTP POST
+        const response = axios({
+            method: 'post',
+            url: 'http://10.0.2.2:5000/hello',
+            data: formData,
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+            },
+        });
+        /* const response = axios.get("http://10.0.2.2:5000/hello");
+        console.log(response.data) */
+        if (onClose) {
+            onClose();
+        }
+    };
+
+    return (
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {Object.keys(formData).map((field) => (
+                <View key={field} style={styles.inputContainer}>
+                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={formData[field]}
+                        onChangeText={(value) => handleInputChange(field, value)}
+                    />
+                </View>
+            ))}
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+        </ScrollView>
+    );
+};
+
 
 const requestPermissions = async () => {
     try {
@@ -82,7 +154,7 @@ const requestPermissions = async () => {
             PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
         ]);
-        
+
         for (const [sKey, sValue] of Object.entries(oGranted)) {
             console.log(`Permission - ${sKey}: ${sValue}`);
         }
@@ -129,7 +201,11 @@ export default class App extends Component<Props> {
             //cards: ['DO', 'MORE', 'OF', 'WHAT', 'MAKES', 'YOU', 'HAPPY'],
             swipedAllCards: false,
             swipeDirection: '',
-            cardIndex: 0
+            cardIndex: 0,
+            //TODO: 2. have showQuestionnaire in state in the constructor
+            showQuestionnaire: false, //todo: Controls the visibility of the questionnaire
+            questionnaireData: [],     //todo: Holds the questionnaire data
+            userResponses: {}          // todo: Stores user responses
         };
 
         this.onBack = this.onBack.bind(this);
@@ -151,6 +227,55 @@ export default class App extends Component<Props> {
         this.onVideoCallStart = this.onVideoCallStart.bind(this);
 
         this.onDrawerToggle = this.onDrawerToggle.bind(this);
+        //TODO: Binding methods...
+        this.handleQuestionnaireResponse = this.handleQuestionnaireResponse.bind(this);
+        this.renderQuestionnaire = this.renderQuestionnaire.bind(this);//todo:
+    }
+
+    //TODO: 5.load the questionnaire data
+    componentDidMount() {
+            this.loadQuestionnaireData();
+        }
+
+        loadQuestionnaireData = () => {
+            // Example of loading data (replace with actual data source)
+            const data = [
+                { id: 1, question: 'What is your favorite color?', options: ['Red', 'Blue', 'Green'] },
+                // Add more questions here
+            ];
+            this.setState({ questionnaireData: data });
+        }
+
+    //TODO: 3.Create a method to render the questionnaire
+    renderQuestionnaire() {
+            return (
+//                <View style={styles.container}>
+//                    {this.state.questionnaireData.map((item) => (
+//                        <View key={item.id} style={styles.questionCard}>
+//                            <Text>{item.question}</Text>
+//                            {item.options.map(option => (
+//                                <Button
+//                                    key={option}
+//                                    title={option}
+//                                    onPress={() => this.handleQuestionnaireResponse(item.id, option)}
+//                                />
+//                            ))}
+//                        </View>
+//                    ))}
+//                </View>
+                <View style={styles.containerVideoCall}>
+                <Questionnaire
+                     data={this.state.questionnaireData}
+                     onClose={() => this.setState({ showQuestionnaire: false })}
+                />
+                </View>
+            );
+    }
+
+    handleQuestionnaireResponse(questionId, response) {
+        this.setState(prevState => ({
+            userResponses: { ...prevState.userResponses, [questionId]: response }
+        }));
     }
 
     renderCard = (card, index) => {
@@ -161,17 +286,23 @@ export default class App extends Component<Props> {
           </View>
         )
     };
-    
+
+
+    //TODO: questionnaire press
+    showQuestionnaire = () => {
+        this.setState({ showQuestionnaire: true });
+    }
+
     onSwiped = (type) => {
         console.log(`on swiped ${type}`)
     }
-    
+
     onSwipedAllCards = () => {
         this.setState({
           swipedAllCards: true
         })
     };
-    
+
     swipeLeft = () => {
         this.swiper.swipeLeft()
     };
@@ -190,7 +321,7 @@ export default class App extends Component<Props> {
     async onRequestSubscription (sku: string) {
         if ('ios' === Platform.OS)
             RNIap.clearTransactionIOS();
-        try {            
+        try {
             await RNIap.requestSubscription(sku);
         } catch (err) {
             console.warn(err.code, err.message);
@@ -199,7 +330,7 @@ export default class App extends Component<Props> {
     }
 */
     onConferenceTerminated(e) {
-        this.endVideoCall();        
+        this.endVideoCall();
         this.injectJavaScript("bx_mobile_apps_video_terminated(" + JSON.stringify(e.nativeEvent) + ")");
     }
 
@@ -218,8 +349,8 @@ export default class App extends Component<Props> {
             videoCallUri: false,
         });
         //JitsiMeet.endCall();
-    } 
-    
+    }
+
     endSwiperView() {
         this.setState ({
             swiperView: 0,
@@ -805,6 +936,9 @@ export default class App extends Component<Props> {
             </View>
           )
 
+        //TODO: 4.Integrate into Main Render Function
+        var sQuestionnaire = this.renderQuestionnaire();
+
         return (
             <NativeBaseProvider> 
                 <StatusBar animated={true} backgroundColor={useTheme('colors.statusBar')} barStyle={useTheme('barStyle')} />
@@ -821,7 +955,10 @@ export default class App extends Component<Props> {
                 ) : (
                     <View />
                 )}
-
+{/*
+                //TODO: 4-1 integrate to main render's return
+*/}
+                {true ? (sQuestionnaire) : <View />} 
                 {this.state.swiperView ? (sSwiper) : 
                 (<View />)}
 
@@ -875,6 +1012,13 @@ function UnaFooter(o) {
                     <IconButton icon={<Icons.User size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={o.onProfileMenu} />
                     {o.bubbles['account'] > 0 && (<Badge num={o.bubbles['account']} />)}
                 </Pressable>
+{/*
+                //TODO: 1.Add Questionnaire Button to Footer
+                Shiwen: let's not worry about adding this button for now.
+                <Pressable py="3" flex={1} style={styles.footerTab}>
+                    <IconButton icon={<Icons.Question size="xl" style={styles.footerIcon} color={useTheme('colors.textOnPrimary')} />} onPress={props.onQuestionnaireToggle} />
+                </Pressable>
+*/}
             </HStack>
     );
 }
@@ -977,6 +1121,12 @@ const styles = new StyleSheet.create({
         alignItems: 'center',
     },
 
+    scrollViewContent: {
+        flexGrow: 1,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center', // Optional: Center content if desired
+    },
+
     header: {
         height: 50,
     },
@@ -1047,6 +1197,7 @@ const styles = new StyleSheet.create({
         flex: 1,
         backgroundColor: '#F5FCFF'
     },
+
     card: {
         flex: 1,
         borderRadius: 4,
