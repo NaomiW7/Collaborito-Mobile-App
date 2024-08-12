@@ -108,6 +108,7 @@ const Questionnaire = ({ onClose }) => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
     const questions = [
+        // Pages 1-7
         {
             field: ['firstName', 'lastName'],
             prompt: "What's your name?",
@@ -143,25 +144,38 @@ const Questionnaire = ({ onClose }) => {
             prompt: "What topics are you interested in?",
             placeholder: "E.g. Advertising, AI, Blockchain, etc."
         },
+        // Page 8 - Goals
         {
             field: 'goals',
             prompt: "What are your goals?",
-            placeholder: "E.g. Find a co-founder, Help with a project, etc."
+            options: [
+                "Find a co-founder to join my idea",
+                "Find people to help with my project",
+                "Contribute my skills to an existing project",
+                "Explore new ideas"
+            ],
+            type: 'checkbox' // To handle the checkbox selection
         },
+        // Page 9-1 - Only show if the user selects the first or second option on the Goals page
         {
             field: 'projectDescription',
             prompt: "Please describe your project/idea in 1-2 sentences.",
-            placeholder: "E.g. A business collecting musical instruments and donating them to school children."
+            placeholder: "E.g. A business collecting musical instruments and donating them to school children.",
+            conditional: (formData) => ['Find a co-founder to join my idea', 'Find people to help with my project'].includes(formData.goals)
         },
+        // Page 9-2 - Only show if the user selects the first or second option on the Goals page
         {
             field: 'projectHelp',
             prompt: "What kind of help are you looking for with your project/idea?",
-            placeholder: "E.g. Help with funding, marketing, etc."
+            placeholder: "E.g. Help with funding, marketing, etc.",
+            conditional: (formData) => ['Find a co-founder to join my idea', 'Find people to help with my project'].includes(formData.goals)
         },
+        // Page 10 - Only show if the user selects the third or fourth option on the Goals page
         {
             field: 'contribution',
             prompt: "How would you like to contribute to others’ projects?",
-            placeholder: "E.g. Full-Time Work, Mentorship, etc."
+            placeholder: "E.g. Full-Time Work, Mentorship, etc.",
+            conditional: (formData) => ['Contribute my skills to an existing project', 'Explore new ideas'].includes(formData.goals)
         }
     ];
 
@@ -203,25 +217,58 @@ const Questionnaire = ({ onClose }) => {
     };
 
 
-const handleNext = () => {
-        if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
+    const isLastQuestion = () => {
+
+            // Check if the current question is the last one that should be shown
+            let nextIndex = currentQuestionIndex + 1;
+            while (nextIndex < questions.length && questions[nextIndex].conditional && !questions[nextIndex].conditional(formData)) {
+                nextIndex++;
+            }
+            return nextIndex >= questions.length;
+        };
+
+
+
+    const handleNext = () => {
+        // Skip questions that should not be displayed based on the user's selections
+        let nextIndex = currentQuestionIndex + 1;
+        while (nextIndex < questions.length && questions[nextIndex].conditional && !questions[nextIndex].conditional(formData)) {
+            nextIndex++;
+        }
+
+        if (nextIndex < questions.length) {
+            setCurrentQuestionIndex(nextIndex);
         }
     };
 
     const handlePrevious = () => {
-        if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(currentQuestionIndex - 1);
+        let prevIndex = currentQuestionIndex - 1;
+        while (prevIndex >= 0 && questions[prevIndex].conditional && !questions[prevIndex].conditional(formData)) {
+            prevIndex--;
+        }
+
+        if (prevIndex >= 0) {
+            setCurrentQuestionIndex(prevIndex);
         }
     };
 
     const currentQuestion = questions[currentQuestionIndex];
 
-    return (
+return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.label}>{currentQuestion.prompt}</Text>
-                {Array.isArray(currentQuestion.field) ? (
+                {currentQuestion.type === 'checkbox' ? (
+                    currentQuestion.options.map((option, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={() => handleInputChange('goals', option)}
+                            style={styles.checkbox}
+                        >
+                            <Text>{option}</Text>
+                        </TouchableOpacity>
+                    ))
+                ) : Array.isArray(currentQuestion.field) ? (
                     currentQuestion.field.map((field, index) => (
                         <TextInput
                             key={field}
@@ -255,7 +302,7 @@ const handleNext = () => {
                             <Text style={styles.buttonText}>Back</Text>
                         </TouchableOpacity>
                     )}
-                    {currentQuestionIndex === questions.length - 1 ? (
+                    {isLastQuestion() ? (
                         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                             <Text style={styles.buttonText}>Submit</Text>
                         </TouchableOpacity>
@@ -268,7 +315,7 @@ const handleNext = () => {
             </ScrollView>
         </View>
     );
- };
+};
 
 
 //    return (
@@ -393,26 +440,21 @@ export default class App extends Component<Props> {
     //TODO: 3.Create a method to render the questionnaire
     renderQuestionnaire() {
             return (
-//                <View style={styles.container}>
-//                    {this.state.questionnaireData.map((item) => (
-//                        <View key={item.id} style={styles.questionCard}>
-//                            <Text>{item.question}</Text>
-//                            {item.options.map(option => (
-//                                <Button
-//                                    key={option}
-//                                    title={option}
-//                                    onPress={() => this.handleQuestionnaireResponse(item.id, option)}
-//                                />
-//                            ))}
-//                        </View>
-//                    ))}
-//                </View>
                 <View style={styles.containerVideoCall}>
                 <Questionnaire
                      data={this.state.questionnaireData}
                      onClose={() => this.setState({ showQuestionnaire: false })}
                 />
                 </View>
+//                <ImageBackground
+//                        source={require('./img/containerQuestionnaire.png')} // Path to your background image
+//                        style={styles.containerQuestionnaire}
+//                      >
+//                    <Questionnaire
+//                      data={this.state.questionnaireData}
+//                      onClose={() => this.setState({ showQuestionnaire: false })}
+//                    />
+//                  </ImageBackground>
             );
     }
 
@@ -1382,6 +1424,7 @@ const styles = new StyleSheet.create({
         backgroundColor: '#F5FCFF',
         padding: 20
     },
+
 
     card: {
         flex: 1,
