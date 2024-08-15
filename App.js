@@ -88,7 +88,7 @@ const Questionnaire = ({ onClose }) => {
         lastName: '',
         city: '',
         country: '',
-        introduction: '',
+        jobTitle: '',
         socialLinks: {
             linkedin: '',
             instagram: '',
@@ -96,13 +96,11 @@ const Questionnaire = ({ onClose }) => {
             twitter: '',
             youtube: ''
         },
-        skills: '',
-        technical: '',
-        interests: '',
-        goals: '',
+        interests: [],
+        goals: [],
         projectDescription: '',
-        projectHelp: '',
-        contribution: ''
+        projectHelp: [],
+        skillsNeeded: []
     });
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -120,9 +118,9 @@ const Questionnaire = ({ onClose }) => {
             placeholders: ['City', 'Country']
         },
         {
-            field: 'introduction',
-            prompt: "Please introduce yourself in one sentence.",
-            placeholder: "E.g. I’m a musician and musical instrument repairer who’s passionate about music education."
+            field: 'jobTitle',
+            prompt: "What's your job title?",
+            placeholder: "Enter your job title"
         },
         {
             field: 'socialLinks',
@@ -130,19 +128,11 @@ const Questionnaire = ({ onClose }) => {
             placeholders: ['LinkedIn', 'Instagram', 'Facebook', 'Twitter', 'YouTube']
         },
         {
-            field: 'skills',
-            prompt: "What are your skills?",
-            placeholder: "E.g. Accounting, AI, Marketing, etc."
-        },
-        {
-            field: 'technical',
-            prompt: "Are you technical?",
-            placeholder: "Yes or No"
-        },
-        {
             field: 'interests',
             prompt: "What topics are you interested in?",
-            placeholder: "E.g. Advertising, AI, Blockchain, etc."
+            sidePrompt: "Add a few to make it easier to find people and projects you might find interesting.",
+            type: 'search',
+            options: ['Music', 'Education', 'Business', 'Sports', 'Entrepreneurship', 'Investing & Finance', 'Science & Tech', 'Social Causes', 'Fashion', 'Art', 'Travel', 'Fitness', 'Food', 'Gaming', 'Parenting', 'Health & Wellness', 'Movies', 'Books', 'Writing', 'Dancing', 'Pets', 'AI', 'Reading', 'Data Science', 'Product Design', 'Robotics', 'Marketing', 'Real Estate']
         },
         // Page 8 - Goals
         {
@@ -160,23 +150,69 @@ const Questionnaire = ({ onClose }) => {
         {
             field: 'projectDescription',
             prompt: "Please describe your project/idea in 1-2 sentences.",
-            placeholder: "E.g. A business collecting musical instruments and donating them to school children.",
-            conditional: (formData) => ['Find a co-founder to join my idea', 'Find people to help with my project'].includes(formData.goals)
+            placeholder: "E.g. A business collecting musical instruments, fixing them up, and donating them to school children.",
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
         },
         // Page 9-2 - Only show if the user selects the first or second option on the Goals page
         {
             field: 'projectHelp',
-            prompt: "What kind of help are you looking for with your project/idea?",
-            placeholder: "E.g. Help with funding, marketing, etc.",
-            conditional: (formData) => ['Find a co-founder to join my idea', 'Find people to help with my project'].includes(formData.goals)
+            prompt: "How would you like others to contribute to your project?",
+            type: 'checkbox',
+            options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
         },
-        // Page 10 - Only show if the user selects the third or fourth option on the Goals page
-        {
-            field: 'contribution',
-            prompt: "How would you like to contribute to others’ projects?",
-            placeholder: "E.g. Full-Time Work, Mentorship, etc.",
-            conditional: (formData) => ['Contribute my skills to an existing project', 'Explore new ideas'].includes(formData.goals)
-        }
+        // Page 9-3 - Only show if the user selects the first or second option on the Goals page
+
+                {
+
+                    field: 'skillsNeeded',
+
+                    prompt: "What skills are you looking for?",
+
+                    type: 'checkbox',
+
+                    options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+
+                    conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+
+                },
+
+                // Page 10-1 - Only show if the user selects the third or fourth option on the Goals page
+
+                {
+
+                    field: 'projectHelp',
+
+                    prompt: "How would you like to contribute to others' projects?",
+
+                    type: 'checkbox',
+
+                    options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+
+                    conditional: (formData) => formData.goals.includes('Contribute my skills to an existing project') || formData.goals.includes('Explore new ideas')
+
+                },
+
+                // Page 10-2 - Only show if the user selects the third or fourth option on the Goals page
+
+                {
+
+                    field: 'skillsNeeded',
+
+                    prompt: "What skills are you looking for?",
+
+                    type: 'checkbox',
+
+                    options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+
+                    conditional: (formData) => formData.goals.includes('Contribute my skills to an existing project') || formData.goals.includes('Explore new ideas')
+//        // Page 10 - Only show if the user selects the third or fourth option on the Goals page
+//        {
+//            field: 'contribution',
+//            prompt: "How would you like to contribute to others’ projects?",
+//            placeholder: "E.g. Full-Time Work, Mentorship, etc.",
+//            conditional: (formData) => ['Contribute my skills to an existing project', 'Explore new ideas'].includes(formData.goals)
+        },
     ];
 
     const handleInputChange = (field, value, subfield) => {
@@ -258,12 +294,25 @@ return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.label}>{currentQuestion.prompt}</Text>
+                {currentQuestion.sidePrompt && <Text style={styles.sidePrompt}>{currentQuestion.sidePrompt}</Text>}
                 {currentQuestion.type === 'checkbox' ? (
                     currentQuestion.options.map((option, index) => (
                         <TouchableOpacity
                             key={index}
-                            onPress={() => handleInputChange('goals', option)}
+                            onPress={() => handleInputChange(currentQuestion.field, option)}
                             style={styles.checkbox}
+                        >
+                            <Text>{option}</Text>
+                        </TouchableOpacity>
+                    ))
+                ) : currentQuestion.type === 'search' ? (
+                    // Placeholder for the search component
+                    // You can implement a search bar here and populate with the `options`
+                    currentQuestion.options.map((option, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={() => handleInputChange(currentQuestion.field, option)}
+                            style={styles.searchOption}
                         >
                             <Text>{option}</Text>
                         </TouchableOpacity>
@@ -279,63 +328,44 @@ return (
                         />
                     ))
                 ) : currentQuestion.field === 'socialLinks' ? (
-                    Object.keys(formData.socialLinks).map((key) => (
-                        <TextInput
-                            key={key}
-                            style={styles.input}
-                            value={formData.socialLinks[key]}
-                            onChangeText={(value) => handleInputChange('socialLinks', value, key)}
-                            placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-                        />
-                    ))
-                ) : (
-                    <TextInput
-                        style={styles.input}
-                        value={formData[currentQuestion.field]}
-                        onChangeText={(value) => handleInputChange(currentQuestion.field, value)}
-                        placeholder={currentQuestion.placeholder}
-                    />
-                )}
-                <View style={styles.buttonContainer}>
-                    {currentQuestionIndex > 0 && (
-                        <TouchableOpacity style={styles.navButton} onPress={handlePrevious}>
-                            <Text style={styles.buttonText}>Back</Text>
-                        </TouchableOpacity>
-                    )}
-                    {isLastQuestion() ? (
-                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                            <Text style={styles.buttonText}>Submit</Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity style={styles.navButton} onPress={handleNext}>
-                            <Text style={styles.buttonText}>Next</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </ScrollView>
-        </View>
-    );
+                   Object.keys(formData.socialLinks).map((key, index) => (
+                       <TextInput
+                           key={key}
+                           style={styles.input}
+                           value={formData.socialLinks[key]}
+                           onChangeText={(value) => handleInputChange('socialLinks', value, key)}
+                           placeholder={currentQuestion.placeholders[index]}
+                       />
+                   ))
+               ) : (
+                   <TextInput
+                       style={styles.input}
+                       value={formData[currentQuestion.field]}
+                       onChangeText={(value) => handleInputChange(currentQuestion.field, value)}
+                       placeholder={currentQuestion.placeholder}
+                   />
+               )}
+
+               <View style={styles.buttonContainer}>
+                   {currentQuestionIndex > 0 && (
+                       <TouchableOpacity onPress={handlePrevious} style={styles.backButton}>
+                           <Text style={styles.backButtonText}>Back</Text>
+                       </TouchableOpacity>
+                   )}
+                   <TouchableOpacity
+                       onPress={isLastQuestion() ? handleSubmit : handleNext}
+                       style={styles.continueButton}
+                   >
+                       <Text style={styles.continueButtonText}>
+                           {isLastQuestion() ? 'Submit' : 'Continue'}
+                       </Text>
+                   </TouchableOpacity>
+               </View>
+           </ScrollView>
+       </View>
+   );
 };
 
-
-//    return (
-//        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-//            {Object.keys(formData).map((field) => (
-//                <View key={field} style={styles.inputContainer}>
-//                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
-//                    <TextInput
-//                        style={styles.input}
-//                        value={formData[field]}
-//                        onChangeText={(value) => handleInputChange(field, value)}
-//                    />
-//                </View>
-//            ))}
-//            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-//                <Text style={styles.submitButtonText}>Submit</Text>
-//            </TouchableOpacity>
-//        </ScrollView>
-//    );
-//};
 
 const requestPermissions = async () => {
     try {
@@ -1306,6 +1336,40 @@ const styles = new StyleSheet.create({
         justifyContent: 'center',  
         alignItems: 'center',
     },
+
+     sidePrompt: {
+            fontSize: 14,
+            color: 'gray',
+            marginBottom: 20,
+        },
+    checkbox: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+        },
+    searchOption: {
+            padding: 10,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            marginBottom: 10,
+        },
+        backButton: {
+                padding: 10,
+                backgroundColor: '#ddd',
+                borderRadius: 5,
+            },
+            backButtonText: {
+                color: '#000',
+            },
+            continueButton: {
+                padding: 10,
+                backgroundColor: '#007BFF',
+                borderRadius: 5,
+            },
+            continueButtonText: {
+                color: '#fff',
+            },
 
 //    scrollViewContent: {
 //        flexGrow: 1,
