@@ -183,8 +183,12 @@ const Questionnaire = ({ onClose }) => {
             prompt: "Please describe your project/idea in 1-2 sentences.",
             placeholder: "E.g. A business collecting musical instruments, fixing them up, and donating them to school children.",
             conditional: (formData) =>
-                formData.goals.includes('Find a co-founder to join my idea') ||
-                formData.goals.includes('Find people to help with my project')
+                (formData.goals.includes('Find a co-founder to join my idea') &&
+                  !(formData.goals.includes('Contribute my skills to an existing project') ||
+                    formData.goals.includes('Explore new ideas')))||
+                formData.goals.includes('Find people to help with my project') &&
+               !(formData.goals.includes('Contribute my skills to an existing project')) &&
+                !(formData.goals.includes('Explore new ideas'))
         },
         // Page 9-2 - Only show if the user selects the first or second option on the Goals page
         {
@@ -193,94 +197,56 @@ const Questionnaire = ({ onClose }) => {
             type: 'checkbox',
             options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
             conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
-//            conditional: (formData) => {
-//                const { goals } = formData;
-//                const firstGoal = "Find a co-founder to join my idea";
-//                const secondGoal = "Find people to help with my project";
-//                const thirdGoal = "Contribute my skills to an existing project";
-//                const fourthGoal = "Explore new ideas";
-//
-//                // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
-//                return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
-//                       (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
-//                       (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
-//                       (goals.includes(secondGoal) && goals.includes(fourthGoal));
-//            }
+
         },
-        // Page 9-3 - Only show if the user selects the first or second option on the Goals page
+    // Page 9-3 - Only show if the user selects the first or second option on the Goals page
 
-                {
-                    field: 'skillsNeeded',
-                    prompt: "What skills are you looking for?",
-                    type: 'checkbox',
-                    options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
-                    conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
-//                    conditional: (formData) => {
-//                        const { goals } = formData;
-//                        const firstGoal = "Find a co-founder to join my idea";
-//                        const secondGoal = "Find people to help with my project";
-//                        const thirdGoal = "Contribute my skills to an existing project";
-//                        const fourthGoal = "Explore new ideas";
-//                        // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
-//                        return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
-//                               (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
-//                               (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
-//                               (goals.includes(secondGoal) && goals.includes(fourthGoal));
-//                    }
-                },
+            {
+                field: 'skillsNeeded',
+                prompt: "What skills are you looking for?",
+                type: 'checkbox',
+                options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+                conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
 
-                // Page 10-1 - Only show if the user selects the third or fourth option on the Goals page
+            },
 
-                {
+            // Page 10-1 - Only show if the user selects the third or fourth option on the Goals page
 
-                    field: 'projectHelp',
-
-                    prompt: "How would you like to contribute to others' projects?",
-
-                    type: 'checkbox',
-
-                    options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
-
-//                    conditional: (formData) =>
-//                        formData.goals.includes('Contribute my skills to an existing project') ||
-//                        formData.goals.includes('Explore new ideas')
+            {
+                field: 'projectHelp',
+                prompt: "How would you like to contribute to others' projects?",
+                type: 'checkbox',
+                options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
                 conditional: (formData) =>
-                            formData.goals.includes('Contribute my skills to an existing project') ||
-                            formData.goals.includes('Explore new ideas') ||
-                            (formData.goals.includes('Find a co-founder to join my idea') ||
-                            formData.goals.includes('Find people to help with my project')) &&
-                            (formData.goals.includes('Contribute my skills to an existing project') ||
-                            formData.goals.includes('Explore new ideas'))
-
-                },
-
-                // Page 10-2 - Only show if the user selects the third or fourth option on the Goals page
-
-                {
-                    field: 'skillsNeeded',
-                    prompt: "What skills are you looking for?",
-                    type: 'checkbox',
-                    options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
-                    conditional: (formData) =>
                         formData.goals.includes('Contribute my skills to an existing project') ||
-                        formData.goals.includes('Explore new ideas')
-        },
-    ];
+                        formData.goals.includes('Explore new ideas') ||
+                        (formData.goals.includes('Find a co-founder to join my idea') ||
+                        formData.goals.includes('Find people to help with my project')) &&
+                        (formData.goals.includes('Contribute my skills to an existing project') ||
+                        formData.goals.includes('Explore new ideas'))
 
-    const handleInputChange = (field, value) => {
+            },
 
+            // Page 10-2 - Only show if the user selects the third or fourth option on the Goals page
+
+            {
+                field: 'skillsNeeded',
+                prompt: "What skills are you looking for?",
+                type: 'checkbox',
+                options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+                conditional: (formData) =>
+                    formData.goals.includes('Contribute my skills to an existing project') ||
+                    formData.goals.includes('Explore new ideas')
+    },
+];
+
+        const handleInputChange = (field, value) => {
             if (Array.isArray(formData[field])) {
-
                 setFormData(prevFormData => ({
-
                     ...prevFormData,
-
                     [field]: prevFormData[field].includes(value)
-
                         ? prevFormData[field].filter(item => item !== value)
-
                         : [...prevFormData[field], value]
-
 //    const handleInputChange = (field, value, subfield) => {
 //        if (subfield) {
 //            setFormData(prevFormData => ({
