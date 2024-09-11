@@ -13,6 +13,7 @@ import Swiper from 'react-native-deck-swiper';
 import { WebView } from 'react-native-webview';
 import axios from 'axios';
 
+
 import {
     Platform,
     StyleSheet,
@@ -135,6 +136,7 @@ const Questionnaire = ({ onClose }) => {
             options: ['Music', 'Education', 'Business', 'Sports', 'Entrepreneurship', 'Investing & Finance', 'Science & Tech', 'Social Causes', 'Fashion', 'Art', 'Travel', 'Fitness', 'Food', 'Gaming', 'Parenting', 'Health & Wellness', 'Movies', 'Books', 'Writing', 'Dancing', 'Pets', 'AI', 'Reading', 'Data Science', 'Product Design', 'Robotics', 'Marketing', 'Real Estate']
         },
         // Page 8 - Goals
+        //For both pages (9 and 10), the conditional property checks if the goals field includes the required combinations (e.g., 1st & 3rd, 2nd & 3rd, etc.).
         {
             field: 'goals',
             prompt: "What are your goals?",
@@ -159,7 +161,20 @@ const Questionnaire = ({ onClose }) => {
             prompt: "How would you like others to contribute to your project?",
             type: 'checkbox',
             options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
-            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+            //conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+            conditional: (formData) => {
+                const { goals } = formData;
+                const firstGoal = "Find a co-founder to join my idea";
+                const secondGoal = "Find people to help with my project";
+                const thirdGoal = "Contribute my skills to an existing project";
+                const fourthGoal = "Explore new ideas";
+
+                // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
+                return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
+                       (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
+                       (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
+                       (goals.includes(secondGoal) && goals.includes(fourthGoal));
+            }
         },
         // Page 9-3 - Only show if the user selects the first or second option on the Goals page
 
@@ -173,8 +188,21 @@ const Questionnaire = ({ onClose }) => {
 
                     options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
 
-                    conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+                    //conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
 
+                    conditional: (formData) => {
+                        const { goals } = formData;
+                        const firstGoal = "Find a co-founder to join my idea";
+                        const secondGoal = "Find people to help with my project";
+                        const thirdGoal = "Contribute my skills to an existing project";
+                        const fourthGoal = "Explore new ideas";
+
+                        // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
+                        return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
+                               (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
+                               (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
+                               (goals.includes(secondGoal) && goals.includes(fourthGoal));
+                    }
                 },
 
                 // Page 10-1 - Only show if the user selects the third or fourth option on the Goals page
@@ -1327,6 +1355,16 @@ function Badge(o) {
 }
 
 const styles = new StyleSheet.create({
+    option: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+      },
+  optionText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+
     webview: {
         flex: 1,
         backgroundColor: 'transparent',
