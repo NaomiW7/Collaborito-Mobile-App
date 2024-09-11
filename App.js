@@ -27,6 +27,7 @@ import {
     TextInput,
     ScrollView,
     TouchableOpacity,
+    ImageBackground
 } from 'react-native';
 import {
     Link,
@@ -183,7 +184,7 @@ const Questionnaire = ({ onClose }) => {
             placeholder: "E.g. A business collecting musical instruments, fixing them up, and donating them to school children.",
             conditional: (formData) =>
                 formData.goals.includes('Find a co-founder to join my idea') ||
-                formData.goals.includes('Find people to help with my project') 
+                formData.goals.includes('Find people to help with my project')
         },
         // Page 9-2 - Only show if the user selects the first or second option on the Goals page
         {
@@ -380,6 +381,10 @@ const Questionnaire = ({ onClose }) => {
     const currentQuestion = questions[currentQuestionIndex];
 
 return (
+        <ImageBackground
+                    source={require('./img/onboardbg.png')}
+                    style={styles.container}
+                >
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.label}>{currentQuestion.prompt}</Text>
@@ -467,6 +472,7 @@ return (
                </View>
            </ScrollView>
        </View>
+       </ImageBackground>
    );
 };
 
@@ -1602,7 +1608,7 @@ const styles = new StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: '#F5FCFF',
+//        backgroundColor: '#F5FCFF',
         padding: 20
     },
 
