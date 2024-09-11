@@ -49,6 +49,7 @@ import {
     Pressable,
     StatusBar,
     SearchIcon,
+    Checkbox,
 } from 'native-base';
 import NativeBaseIcon from './src/components/NativeBaseIcon';
 import { Path, G } from "react-native-svg";
@@ -104,8 +105,34 @@ const Questionnaire = ({ onClose }) => {
         skillsNeeded: []
     });
 
+
+
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
+    // Function to handle checkbox changes
+    const handleCheckboxChange = (field, value) => {
+        setFormData(prevData => {
+            const updatedValues = prevData[field].includes(value)
+                ? prevData[field].filter(item => item !== value) // Remove if already selected
+                : [...prevData[field], value]; // Add if not selected
+            return { ...prevData, [field]: updatedValues };
+        });
+    };
+
+    // Rendering checkboxes
+    const renderCheckboxes = (field, options) => (
+        options.map(option => (
+            <div key={option}>
+                <input
+                    type="checkbox"
+                    id={option}
+                    checked={formData[field].includes(option)}
+                    onChange={() => handleCheckboxChange(field, option)}
+                />
+                <label htmlFor={option}>{option}</label>
+            </div>
+        ))
+    );
     const questions = [
         // Pages 1-7
         {
@@ -146,14 +173,17 @@ const Questionnaire = ({ onClose }) => {
                 "Contribute my skills to an existing project",
                 "Explore new ideas"
             ],
-            type: 'checkbox' // To handle the checkbox selection
+            type: 'checkbox', // To handle the checkbox selection
+            render: () => renderCheckboxes('goals', ["Find a co-founder to join my idea", "Find people to help with my project", "Contribute my skills to an existing project", "Explore new ideas"])
         },
         // Page 9-1 - Only show if the user selects the first or second option on the Goals page
         {
             field: 'projectDescription',
             prompt: "Please describe your project/idea in 1-2 sentences.",
             placeholder: "E.g. A business collecting musical instruments, fixing them up, and donating them to school children.",
-            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+            conditional: (formData) =>
+                formData.goals.includes('Find a co-founder to join my idea') ||
+                formData.goals.includes('Find people to help with my project') 
         },
         // Page 9-2 - Only show if the user selects the first or second option on the Goals page
         {
@@ -161,48 +191,41 @@ const Questionnaire = ({ onClose }) => {
             prompt: "How would you like others to contribute to your project?",
             type: 'checkbox',
             options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
-            //conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
-            conditional: (formData) => {
-                const { goals } = formData;
-                const firstGoal = "Find a co-founder to join my idea";
-                const secondGoal = "Find people to help with my project";
-                const thirdGoal = "Contribute my skills to an existing project";
-                const fourthGoal = "Explore new ideas";
-
-                // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
-                return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
-                       (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
-                       (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
-                       (goals.includes(secondGoal) && goals.includes(fourthGoal));
-            }
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+//            conditional: (formData) => {
+//                const { goals } = formData;
+//                const firstGoal = "Find a co-founder to join my idea";
+//                const secondGoal = "Find people to help with my project";
+//                const thirdGoal = "Contribute my skills to an existing project";
+//                const fourthGoal = "Explore new ideas";
+//
+//                // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
+//                return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
+//                       (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
+//                       (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
+//                       (goals.includes(secondGoal) && goals.includes(fourthGoal));
+//            }
         },
         // Page 9-3 - Only show if the user selects the first or second option on the Goals page
 
                 {
-
                     field: 'skillsNeeded',
-
                     prompt: "What skills are you looking for?",
-
                     type: 'checkbox',
-
                     options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
-
-                    //conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
-
-                    conditional: (formData) => {
-                        const { goals } = formData;
-                        const firstGoal = "Find a co-founder to join my idea";
-                        const secondGoal = "Find people to help with my project";
-                        const thirdGoal = "Contribute my skills to an existing project";
-                        const fourthGoal = "Explore new ideas";
-
-                        // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
-                        return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
-                               (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
-                               (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
-                               (goals.includes(secondGoal) && goals.includes(fourthGoal));
-                    }
+                    conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+//                    conditional: (formData) => {
+//                        const { goals } = formData;
+//                        const firstGoal = "Find a co-founder to join my idea";
+//                        const secondGoal = "Find people to help with my project";
+//                        const thirdGoal = "Contribute my skills to an existing project";
+//                        const fourthGoal = "Explore new ideas";
+//                        // Logic for combinations: (1st & 3rd), (2nd & 3rd), (1st & 4th), (2nd & 4th)
+//                        return (goals.includes(firstGoal) && goals.includes(thirdGoal)) ||
+//                               (goals.includes(secondGoal) && goals.includes(thirdGoal)) ||
+//                               (goals.includes(firstGoal) && goals.includes(fourthGoal)) ||
+//                               (goals.includes(secondGoal) && goals.includes(fourthGoal));
+//                    }
                 },
 
                 // Page 10-1 - Only show if the user selects the third or fourth option on the Goals page
@@ -217,40 +240,54 @@ const Questionnaire = ({ onClose }) => {
 
                     options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
 
-                    conditional: (formData) => formData.goals.includes('Contribute my skills to an existing project') || formData.goals.includes('Explore new ideas')
+//                    conditional: (formData) =>
+//                        formData.goals.includes('Contribute my skills to an existing project') ||
+//                        formData.goals.includes('Explore new ideas')
+                conditional: (formData) =>
+                            formData.goals.includes('Contribute my skills to an existing project') ||
+                            formData.goals.includes('Explore new ideas') ||
+                            (formData.goals.includes('Find a co-founder to join my idea') ||
+                            formData.goals.includes('Find people to help with my project')) &&
+                            (formData.goals.includes('Contribute my skills to an existing project') ||
+                            formData.goals.includes('Explore new ideas'))
 
                 },
 
                 // Page 10-2 - Only show if the user selects the third or fourth option on the Goals page
 
                 {
-
                     field: 'skillsNeeded',
-
                     prompt: "What skills are you looking for?",
-
                     type: 'checkbox',
-
                     options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
-
-                    conditional: (formData) => formData.goals.includes('Contribute my skills to an existing project') || formData.goals.includes('Explore new ideas')
-//        // Page 10 - Only show if the user selects the third or fourth option on the Goals page
-//        {
-//            field: 'contribution',
-//            prompt: "How would you like to contribute to others’ projects?",
-//            placeholder: "E.g. Full-Time Work, Mentorship, etc.",
-//            conditional: (formData) => ['Contribute my skills to an existing project', 'Explore new ideas'].includes(formData.goals)
+                    conditional: (formData) =>
+                        formData.goals.includes('Contribute my skills to an existing project') ||
+                        formData.goals.includes('Explore new ideas')
         },
     ];
 
-    const handleInputChange = (field, value, subfield) => {
-        if (subfield) {
-            setFormData(prevFormData => ({
-                ...prevFormData,
-                [field]: {
-                    ...prevFormData[field],
-                    [subfield]: value
-                }
+    const handleInputChange = (field, value) => {
+
+            if (Array.isArray(formData[field])) {
+
+                setFormData(prevFormData => ({
+
+                    ...prevFormData,
+
+                    [field]: prevFormData[field].includes(value)
+
+                        ? prevFormData[field].filter(item => item !== value)
+
+                        : [...prevFormData[field], value]
+
+//    const handleInputChange = (field, value, subfield) => {
+//        if (subfield) {
+//            setFormData(prevFormData => ({
+//                ...prevFormData,
+//                [field]: {
+//                    ...prevFormData[field],
+//                    [subfield]: value
+//                }
             }));
         } else {
             setFormData(prevFormData => ({
@@ -281,15 +318,39 @@ const Questionnaire = ({ onClose }) => {
     };
 
 
-    const isLastQuestion = () => {
+//    const isLastQuestion = () => {
+//
+//            // Check if the current question is the last one that should be shown
+//            let nextIndex = currentQuestionIndex + 1;
+//            while (nextIndex < questions.length && questions[nextIndex].conditional && !questions[nextIndex].conditional(formData)) {
+//                nextIndex++;
+//            }
+//            return nextIndex >= questions.length;
+//        };
 
-            // Check if the current question is the last one that should be shown
-            let nextIndex = currentQuestionIndex + 1;
-            while (nextIndex < questions.length && questions[nextIndex].conditional && !questions[nextIndex].conditional(formData)) {
-                nextIndex++;
+    const isLastQuestion = () => {
+        // Start with the index of the next question
+        let nextIndex = currentQuestionIndex + 1;
+
+        // Iterate through subsequent questions
+        while (nextIndex < questions.length) {
+            // Check if the next question is conditional
+            if (questions[nextIndex].conditional) {
+                // If the condition is not met, skip to the next question
+                if (!questions[nextIndex].conditional(formData)) {
+                    nextIndex++;
+                    continue;
+                }
             }
-            return nextIndex >= questions.length;
-        };
+
+            // If we find a question that should be shown, break the loop
+            break;
+        }
+
+        // Check if we've reached or exceeded the length of the questions array
+        return nextIndex >= questions.length;
+    };
+
 
 
 
@@ -325,13 +386,28 @@ return (
                 {currentQuestion.sidePrompt && <Text style={styles.sidePrompt}>{currentQuestion.sidePrompt}</Text>}
                 {currentQuestion.type === 'checkbox' ? (
                     currentQuestion.options.map((option, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => handleInputChange(currentQuestion.field, option)}
-                            style={styles.checkbox}
-                        >
-                            <Text>{option}</Text>
-                        </TouchableOpacity>
+//                        <TouchableOpacity
+//                            key={index}
+//                            onPress={() => handleInputChange(currentQuestion.field, option)}
+//                            style={styles.checkbox}
+//                        >
+//                            <Text>{option}</Text>
+//                        </TouchableOpacity>
+                        <View key={index} style={styles.checkboxContainer}>
+
+                            <Checkbox
+
+                                isChecked={formData[currentQuestion.field].includes(option)}
+
+                                onChange={() => handleInputChange(currentQuestion.field, option)}
+
+                                style={styles.checkbox}
+
+                            />
+
+                            <Text style={styles.optionText}>{option}</Text>
+
+                        </View>
                     ))
                 ) : currentQuestion.type === 'search' ? (
                     // Placeholder for the search component
@@ -1364,6 +1440,9 @@ const styles = new StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
   },
+  checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+
+      checkbox: { marginRight: 10 },
 
     webview: {
         flex: 1,
