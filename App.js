@@ -1478,20 +1478,26 @@ const styles = new StyleSheet.create({
             marginBottom: 10,
         },
         backButton: {
-                padding: 10,
-                backgroundColor: '#ddd',
+                backgroundColor: 'white',
+                paddingVertical: 10,
+                paddingHorizontal: 20,
                 borderRadius: 5,
+                alignSelf: 'flex-start',
             },
             backButtonText: {
-                color: '#000',
+                color: 'black',
+                fontSize: 16,
             },
             continueButton: {
-                padding: 10,
-                backgroundColor: '#007BFF',
+                backgroundColor: 'black',
+                paddingVertical: 10,
+                paddingHorizontal: 20,
                 borderRadius: 5,
+                alignSelf: 'center',
             },
             continueButtonText: {
-                color: '#fff',
+               color: 'white',
+               fontSize: 16,
             },
 
 //    scrollViewContent: {
@@ -1530,9 +1536,11 @@ const styles = new StyleSheet.create({
          borderRadius: 5,
      },
      submitButton: {
-         backgroundColor: '#28a745',
-         padding: 10,
+         backgroundColor: 'black',
+         paddingVertical: 10,
+         paddingHorizontal: 20,
          borderRadius: 5,
+         alignSelf: 'center',
      },
      buttonText: {
          color: '#fff',
