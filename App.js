@@ -182,21 +182,23 @@ const Questionnaire = ({ onClose }) => {
             field: 'projectDescription',
             prompt: "Please describe your project/idea in 1-2 sentences.",
             placeholder: "E.g. A business collecting musical instruments, fixing them up, and donating them to school children.",
-            conditional: (formData) =>
-                (formData.goals.includes('Find a co-founder to join my idea') &&
-                  !(formData.goals.includes('Contribute my skills to an existing project') ||
-                    formData.goals.includes('Explore new ideas')))||
-                formData.goals.includes('Find people to help with my project') &&
-               !(formData.goals.includes('Contribute my skills to an existing project')) &&
-                !(formData.goals.includes('Explore new ideas'))
+//            conditional: (formData) =>
+//                (formData.goals.includes('Find a co-founder to join my idea') &&
+//                  !(formData.goals.includes('Contribute my skills to an existing project') ||
+//                    formData.goals.includes('Explore new ideas')))||
+//                formData.goals.includes('Find people to help with my project') &&
+//               !(formData.goals.includes('Contribute my skills to an existing project')) &&
+//                !(formData.goals.includes('Explore new ideas'))
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
         },
         // Page 9-2 - Only show if the user selects the first or second option on the Goals page
         {
             field: 'projectHelp',
-            prompt: "How would you like others to contribute to your project?",
+            prompt: "What help do you need on your project?",
             type: 'checkbox',
             options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
-            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea')
+            || formData.goals.includes('Find people to help with my project')
 
         },
     // Page 9-3 - Only show if the user selects the first or second option on the Goals page
@@ -206,7 +208,8 @@ const Questionnaire = ({ onClose }) => {
                 prompt: "What skills are you looking for?",
                 type: 'checkbox',
                 options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
-                conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+                conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea')
+                || formData.goals.includes('Find people to help with my project')
 
             },
 
@@ -217,13 +220,16 @@ const Questionnaire = ({ onClose }) => {
                 prompt: "How would you like to contribute to others' projects?",
                 type: 'checkbox',
                 options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+//                conditional: (formData) =>
+//                        formData.goals.includes('Contribute my skills to an existing project') ||
+//                        formData.goals.includes('Explore new ideas') ||
+//                        (formData.goals.includes('Find a co-founder to join my idea') ||
+//                        formData.goals.includes('Find people to help with my project')) &&
+//                        (formData.goals.includes('Contribute my skills to an existing project') ||
+//                        formData.goals.includes('Explore new ideas'))
                 conditional: (formData) =>
                         formData.goals.includes('Contribute my skills to an existing project') ||
-                        formData.goals.includes('Explore new ideas') ||
-                        (formData.goals.includes('Find a co-founder to join my idea') ||
-                        formData.goals.includes('Find people to help with my project')) &&
-                        (formData.goals.includes('Contribute my skills to an existing project') ||
-                        formData.goals.includes('Explore new ideas'))
+                        formData.goals.includes('Explore new ideas')
 
             },
 
@@ -238,6 +244,30 @@ const Questionnaire = ({ onClose }) => {
                     formData.goals.includes('Contribute my skills to an existing project') ||
                     formData.goals.includes('Explore new ideas')
     },
+    // Page 11-1 - Only show if the user selects combinations involving options 1 or 2 and 3 or 4
+        {
+            field: 'projectHelp',
+            prompt: "How would you like to contribute to other people’s projects?",
+            type: 'checkbox',
+            options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+            conditional: (formData) =>
+                (formData.goals.includes('Find a co-founder to join my idea') ||
+                 formData.goals.includes('Find people to help with my project')) &&
+                (formData.goals.includes('Contribute my skills to an existing project') ||
+                 formData.goals.includes('Explore new ideas'))
+        },
+        // Page 11-2 - Only show if the user selects combinations involving options 1 or 2 and 3 or 4
+        {
+            field: 'skillsNeeded',
+            prompt: "What are your skills?",
+            type: 'checkbox',
+            options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+            conditional: (formData) =>
+                (formData.goals.includes('Find a co-founder to join my idea') ||
+                 formData.goals.includes('Find people to help with my project')) &&
+                (formData.goals.includes('Contribute my skills to an existing project') ||
+                 formData.goals.includes('Explore new ideas'))
+        }
 ];
 
         const handleInputChange = (field, value) => {
@@ -372,12 +402,17 @@ return (
 
                                 onChange={() => handleInputChange(currentQuestion.field, option)}
 
+//                                style={styles.checkbox}
+                                _checked={{
+                                    bgColor: 'black', // Changes the fill color to black when checked
+                                    borderColor: 'black', // Keeps the border color black
+                                }}
+                                _icon={{
+                                    color: 'white', // Icon color inside the checkbox
+                                }}
                                 style={styles.checkbox}
-
                             />
-
                             <Text style={styles.optionText}>{option}</Text>
-
                         </View>
                     ))
                 ) : currentQuestion.type === 'search' ? (
@@ -1414,8 +1449,6 @@ const styles = new StyleSheet.create({
   },
   checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
 
-      checkbox: { marginRight: 10 },
-
     webview: {
         flex: 1,
         backgroundColor: 'transparent',
@@ -1435,7 +1468,16 @@ const styles = new StyleSheet.create({
             flexDirection: 'row',
             alignItems: 'center',
             marginBottom: 10,
+            borderColor: 'black',
+            color: 'black', // Icon color when checked
         },
+
+    checkedCheckbox: {
+        backgroundColor: 'black', // Black fill color when checked
+        borderColor: 'black', // Optional: to keep the border black when checked
+      },
+
+
     searchOption: {
             padding: 10,
             borderWidth: 1,
