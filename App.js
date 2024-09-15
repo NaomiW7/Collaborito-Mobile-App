@@ -228,8 +228,10 @@ const Questionnaire = ({ onClose }) => {
 //                        (formData.goals.includes('Contribute my skills to an existing project') ||
 //                        formData.goals.includes('Explore new ideas'))
                 conditional: (formData) =>
-                        formData.goals.includes('Contribute my skills to an existing project') ||
-                        formData.goals.includes('Explore new ideas')
+                        (formData.goals.includes('Contribute my skills to an existing project') ||
+                        formData.goals.includes('Explore new ideas')) &&
+                        !(formData.goals.includes('Find a co-founder to join my idea') ||
+                        formData.goals.includes('Find people to help with my project'))
 
             },
 
@@ -240,9 +242,14 @@ const Questionnaire = ({ onClose }) => {
                 prompt: "What skills are you looking for?",
                 type: 'checkbox',
                 options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+//                conditional: (formData) =>
+//                    formData.goals.includes('Contribute my skills to an existing project') ||
+//                    formData.goals.includes('Explore new ideas')
                 conditional: (formData) =>
-                    formData.goals.includes('Contribute my skills to an existing project') ||
-                    formData.goals.includes('Explore new ideas')
+                        (formData.goals.includes('Contribute my skills to an existing project') ||
+                        formData.goals.includes('Explore new ideas')) &&
+                        !(formData.goals.includes('Find a co-founder to join my idea') ||
+                        formData.goals.includes('Find people to help with my project'))
     },
     // Page 11-1 - Only show if the user selects combinations involving options 1 or 2 and 3 or 4
         {
@@ -362,6 +369,9 @@ const Questionnaire = ({ onClose }) => {
             setCurrentQuestionIndex(nextIndex);
         }
     };
+
+
+
 
     const handlePrevious = () => {
         let prevIndex = currentQuestionIndex - 1;
