@@ -13,6 +13,7 @@ import Swiper from 'react-native-deck-swiper';
 import { WebView } from 'react-native-webview';
 import axios from 'axios';
 
+
 import {
     Platform,
     StyleSheet,
@@ -26,6 +27,7 @@ import {
     TextInput,
     ScrollView,
     TouchableOpacity,
+    ImageBackground
 } from 'react-native';
 import {
     Link,
@@ -48,6 +50,7 @@ import {
     Pressable,
     StatusBar,
     SearchIcon,
+    Checkbox,
 } from 'native-base';
 import NativeBaseIcon from './src/components/NativeBaseIcon';
 import { Path, G } from "react-native-svg";
@@ -81,29 +84,221 @@ const ONESIGNALAPPID = ''; // you can obtain one from https://onesignal.com/
 const PAYMENTS_CALLBACK = ''; // empty string means payment functionality is disabled
 
 //todo: questionnarie - handle input change - handle submit - return
+
 const Questionnaire = ({ onClose }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        age: '',
-        gender: '',
-        location: '',
+        firstName: '',
+        lastName: '',
+        city: '',
+        country: '',
         jobTitle: '',
-        socialUrls: '',
-        networkingNeeds: '',
-        skillsRequired: '',
-        experienceRequired: '',
-        timeCommitment: '',
-        collaborationPreferences: '',
+        socialLinks: {
+            linkedin: '',
+            instagram: '',
+            facebook: '',
+            twitter: '',
+            youtube: ''
+        },
+        interests: [],
+        goals: [],
         projectDescription: '',
-        projectIndustry: '',
-        interests: ''
+        projectHelp: [],
+        skillsNeeded: []
     });
 
-    const handleInputChange = (field, value) => {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            [field]: value
-        }));
+
+
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+    // Function to handle checkbox changes
+    const handleCheckboxChange = (field, value) => {
+        setFormData(prevData => {
+            const updatedValues = prevData[field].includes(value)
+                ? prevData[field].filter(item => item !== value) // Remove if already selected
+                : [...prevData[field], value]; // Add if not selected
+            return { ...prevData, [field]: updatedValues };
+        });
+    };
+
+    // Rendering checkboxes
+    const renderCheckboxes = (field, options) => (
+        options.map(option => (
+            <div key={option}>
+                <input
+                    type="checkbox"
+                    id={option}
+                    checked={formData[field].includes(option)}
+                    onChange={() => handleCheckboxChange(field, option)}
+                />
+                <label htmlFor={option}>{option}</label>
+            </div>
+        ))
+    );
+    const questions = [
+        // Pages 1-7
+        {
+            field: ['firstName', 'lastName'],
+            prompt: "What's your name?",
+            placeholders: ['First name', 'Last name']
+        },
+        {
+            field: ['city', 'country'],
+            prompt: "Where are you based?",
+            placeholders: ['City', 'Country']
+        },
+        {
+            field: 'jobTitle',
+            prompt: "What's your job title?",
+            placeholder: "Enter your job title"
+        },
+        {
+            field: 'socialLinks',
+            prompt: "Please enter any social media links you’d like to share.",
+            placeholders: ['LinkedIn', 'Instagram', 'Facebook', 'Twitter', 'YouTube']
+        },
+        {
+            field: 'interests',
+            prompt: "What topics are you interested in?",
+            sidePrompt: "Add a few to make it easier to find people and projects you might find interesting.",
+            type: 'search',
+            options: ['Music', 'Education', 'Business', 'Sports', 'Entrepreneurship', 'Investing & Finance', 'Science & Tech', 'Social Causes', 'Fashion', 'Art', 'Travel', 'Fitness', 'Food', 'Gaming', 'Parenting', 'Health & Wellness', 'Movies', 'Books', 'Writing', 'Dancing', 'Pets', 'AI', 'Reading', 'Data Science', 'Product Design', 'Robotics', 'Marketing', 'Real Estate']
+        },
+        // Page 8 - Goals
+        //For both pages (9 and 10), the conditional property checks if the goals field includes the required combinations (e.g., 1st & 3rd, 2nd & 3rd, etc.).
+        {
+            field: 'goals',
+            prompt: "What are your goals?",
+            options: [
+                "Find a co-founder to join my idea",
+                "Find people to help with my project",
+                "Contribute my skills to an existing project",
+                "Explore new ideas"
+            ],
+            type: 'checkbox', // To handle the checkbox selection
+            render: () => renderCheckboxes('goals', ["Find a co-founder to join my idea", "Find people to help with my project", "Contribute my skills to an existing project", "Explore new ideas"])
+        },
+        // Page 9-1 - Only show if the user selects the first or second option on the Goals page
+        {
+            field: 'projectDescription',
+            prompt: "Please describe your project/idea in 1-2 sentences.",
+            placeholder: "E.g. A business collecting musical instruments, fixing them up, and donating them to school children.",
+//            conditional: (formData) =>
+//                (formData.goals.includes('Find a co-founder to join my idea') &&
+//                  !(formData.goals.includes('Contribute my skills to an existing project') ||
+//                    formData.goals.includes('Explore new ideas')))||
+//                formData.goals.includes('Find people to help with my project') &&
+//               !(formData.goals.includes('Contribute my skills to an existing project')) &&
+//                !(formData.goals.includes('Explore new ideas'))
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea') || formData.goals.includes('Find people to help with my project')
+        },
+        // Page 9-2 - Only show if the user selects the first or second option on the Goals page
+        {
+            field: 'projectHelp',
+            prompt: "What help do you need on your project?",
+            type: 'checkbox',
+            options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+            conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea')
+            || formData.goals.includes('Find people to help with my project')
+
+        },
+    // Page 9-3 - Only show if the user selects the first or second option on the Goals page
+
+            {
+                field: 'skillsNeeded',
+                prompt: "What skills are you looking for?",
+                type: 'checkbox',
+                options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+                conditional: (formData) => formData.goals.includes('Find a co-founder to join my idea')
+                || formData.goals.includes('Find people to help with my project')
+
+            },
+
+            // Page 10-1 - Only show if the user selects the third or fourth option on the Goals page
+
+            {
+                field: 'projectHelp',
+                prompt: "How would you like to contribute to others' projects?",
+                type: 'checkbox',
+                options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+//                conditional: (formData) =>
+//                        formData.goals.includes('Contribute my skills to an existing project') ||
+//                        formData.goals.includes('Explore new ideas') ||
+//                        (formData.goals.includes('Find a co-founder to join my idea') ||
+//                        formData.goals.includes('Find people to help with my project')) &&
+//                        (formData.goals.includes('Contribute my skills to an existing project') ||
+//                        formData.goals.includes('Explore new ideas'))
+                conditional: (formData) =>
+                        (formData.goals.includes('Contribute my skills to an existing project') ||
+                        formData.goals.includes('Explore new ideas')) &&
+                        !(formData.goals.includes('Find a co-founder to join my idea') ||
+                        formData.goals.includes('Find people to help with my project'))
+
+            },
+
+            // Page 10-2 - Only show if the user selects the third or fourth option on the Goals page
+
+            {
+                field: 'skillsNeeded',
+                prompt: "What skills are you looking for?",
+                type: 'checkbox',
+                options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+//                conditional: (formData) =>
+//                    formData.goals.includes('Contribute my skills to an existing project') ||
+//                    formData.goals.includes('Explore new ideas')
+                conditional: (formData) =>
+                        (formData.goals.includes('Contribute my skills to an existing project') ||
+                        formData.goals.includes('Explore new ideas')) &&
+                        !(formData.goals.includes('Find a co-founder to join my idea') ||
+                        formData.goals.includes('Find people to help with my project'))
+    },
+    // Page 11-1 - Only show if the user selects combinations involving options 1 or 2 and 3 or 4
+        {
+            field: 'projectHelp',
+            prompt: "How would you like to contribute to other people’s projects?",
+            type: 'checkbox',
+            options: ['Full-Time Work', 'Part-Time Work', 'Internship', 'Volunteering or Probono', 'Co-Founder', 'Advice & Mentorship', 'Feedback & Research Participation'],
+            conditional: (formData) =>
+                (formData.goals.includes('Find a co-founder to join my idea') ||
+                 formData.goals.includes('Find people to help with my project')) &&
+                (formData.goals.includes('Contribute my skills to an existing project') ||
+                 formData.goals.includes('Explore new ideas'))
+        },
+        // Page 11-2 - Only show if the user selects combinations involving options 1 or 2 and 3 or 4
+        {
+            field: 'skillsNeeded',
+            prompt: "What are your skills?",
+            type: 'checkbox',
+            options: ['Accounting', 'Artificial Intelligence & Machine Learning', 'Biotechnology', 'Business', 'Content Creation (e.g. video, copywriting)', 'Counseling & Therapy', 'Data Analysis', 'DevOps', 'Finance', 'Fundraising', 'Graphic Design', 'Legal', 'Manufacturing', 'Marketing', 'Policy', 'Product Management', 'Project Management', 'Public Relations', 'Research', 'Sales', 'Software Development (Backend)', 'Software Development (Frontend)', 'UI/UX Design', 'Other'],
+            conditional: (formData) =>
+                (formData.goals.includes('Find a co-founder to join my idea') ||
+                 formData.goals.includes('Find people to help with my project')) &&
+                (formData.goals.includes('Contribute my skills to an existing project') ||
+                 formData.goals.includes('Explore new ideas'))
+        }
+];
+
+        const handleInputChange = (field, value) => {
+            if (Array.isArray(formData[field])) {
+                setFormData(prevFormData => ({
+                    ...prevFormData,
+                    [field]: prevFormData[field].includes(value)
+                        ? prevFormData[field].filter(item => item !== value)
+                        : [...prevFormData[field], value]
+//    const handleInputChange = (field, value, subfield) => {
+//        if (subfield) {
+//            setFormData(prevFormData => ({
+//                ...prevFormData,
+//                [field]: {
+//                    ...prevFormData[field],
+//                    [subfield]: value
+//                }
+            }));
+        } else {
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                [field]: value
+            }));
+        }
     };
 
     const handleSubmit = () => {
@@ -126,23 +321,170 @@ const Questionnaire = ({ onClose }) => {
         }
     };
 
-    return (
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {Object.keys(formData).map((field) => (
-                <View key={field} style={styles.inputContainer}>
-                    <Text style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()}</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={formData[field]}
-                        onChangeText={(value) => handleInputChange(field, value)}
-                    />
-                </View>
-            ))}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-        </ScrollView>
-    );
+
+//    const isLastQuestion = () => {
+//
+//            // Check if the current question is the last one that should be shown
+//            let nextIndex = currentQuestionIndex + 1;
+//            while (nextIndex < questions.length && questions[nextIndex].conditional && !questions[nextIndex].conditional(formData)) {
+//                nextIndex++;
+//            }
+//            return nextIndex >= questions.length;
+//        };
+
+    const isLastQuestion = () => {
+        // Start with the index of the next question
+        let nextIndex = currentQuestionIndex + 1;
+
+        // Iterate through subsequent questions
+        while (nextIndex < questions.length) {
+            // Check if the next question is conditional
+            if (questions[nextIndex].conditional) {
+                // If the condition is not met, skip to the next question
+                if (!questions[nextIndex].conditional(formData)) {
+                    nextIndex++;
+                    continue;
+                }
+            }
+
+            // If we find a question that should be shown, break the loop
+            break;
+        }
+
+        // Check if we've reached or exceeded the length of the questions array
+        return nextIndex >= questions.length;
+    };
+
+
+
+
+    const handleNext = () => {
+        // Skip questions that should not be displayed based on the user's selections
+        let nextIndex = currentQuestionIndex + 1;
+        while (nextIndex < questions.length && questions[nextIndex].conditional && !questions[nextIndex].conditional(formData)) {
+            nextIndex++;
+        }
+
+        if (nextIndex < questions.length) {
+            setCurrentQuestionIndex(nextIndex);
+        }
+    };
+
+
+
+
+    const handlePrevious = () => {
+        let prevIndex = currentQuestionIndex - 1;
+        while (prevIndex >= 0 && questions[prevIndex].conditional && !questions[prevIndex].conditional(formData)) {
+            prevIndex--;
+        }
+
+        if (prevIndex >= 0) {
+            setCurrentQuestionIndex(prevIndex);
+        }
+    };
+
+    const currentQuestion = questions[currentQuestionIndex];
+
+return (
+        <ImageBackground
+                    source={require('./img/onboardbg.png')}
+                    style={styles.container}
+                >
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <Text style={styles.label}>{currentQuestion.prompt}</Text>
+                {currentQuestion.sidePrompt && <Text style={styles.sidePrompt}>{currentQuestion.sidePrompt}</Text>}
+                {currentQuestion.type === 'checkbox' ? (
+                    currentQuestion.options.map((option, index) => (
+//                        <TouchableOpacity
+//                            key={index}
+//                            onPress={() => handleInputChange(currentQuestion.field, option)}
+//                            style={styles.checkbox}
+//                        >
+//                            <Text>{option}</Text>
+//                        </TouchableOpacity>
+                        <View key={index} style={styles.checkboxContainer}>
+
+                            <Checkbox
+
+                                isChecked={formData[currentQuestion.field].includes(option)}
+
+                                onChange={() => handleInputChange(currentQuestion.field, option)}
+
+//                                style={styles.checkbox}
+                                _checked={{
+                                    bgColor: 'black', // Changes the fill color to black when checked
+                                    borderColor: 'black', // Keeps the border color black
+                                }}
+                                _icon={{
+                                    color: 'white', // Icon color inside the checkbox
+                                }}
+                                style={styles.checkbox}
+                            />
+                            <Text style={styles.optionText}>{option}</Text>
+                        </View>
+                    ))
+                ) : currentQuestion.type === 'search' ? (
+                    // Placeholder for the search component
+                    // You can implement a search bar here and populate with the `options`
+                    currentQuestion.options.map((option, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={() => handleInputChange(currentQuestion.field, option)}
+                            style={styles.searchOption}
+                        >
+                            <Text>{option}</Text>
+                        </TouchableOpacity>
+                    ))
+                ) : Array.isArray(currentQuestion.field) ? (
+                    currentQuestion.field.map((field, index) => (
+                        <TextInput
+                            key={field}
+                            style={styles.input}
+                            value={formData[field]}
+                            onChangeText={(value) => handleInputChange(field, value)}
+                            placeholder={currentQuestion.placeholders[index]}
+                        />
+                    ))
+                ) : currentQuestion.field === 'socialLinks' ? (
+                   Object.keys(formData.socialLinks).map((key, index) => (
+                       <TextInput
+                           key={key}
+                           style={styles.input}
+                           value={formData.socialLinks[key]}
+                           onChangeText={(value) => handleInputChange('socialLinks', value, key)}
+                           placeholder={currentQuestion.placeholders[index]}
+                       />
+                   ))
+               ) : (
+                   <TextInput
+                       style={styles.input}
+                       value={formData[currentQuestion.field]}
+                       onChangeText={(value) => handleInputChange(currentQuestion.field, value)}
+                       placeholder={currentQuestion.placeholder}
+                   />
+               )}
+
+               <View style={styles.buttonContainer}>
+                   {currentQuestionIndex > 0 && (
+                       <TouchableOpacity onPress={handlePrevious} style={styles.backButton}>
+                           <Text style={styles.backButtonText}>Back</Text>
+                       </TouchableOpacity>
+                   )}
+                   <TouchableOpacity
+                       onPress={isLastQuestion() ? handleSubmit : handleNext}
+                       style={styles.continueButton}
+                   >
+                       <Text style={styles.continueButtonText}>
+                           {isLastQuestion() ? 'Submit' : 'Continue'}
+                       </Text>
+                   </TouchableOpacity>
+               </View>
+           </ScrollView>
+       </View>
+       </ImageBackground>
+   );
 };
 
 
@@ -249,26 +591,21 @@ export default class App extends Component<Props> {
     //TODO: 3.Create a method to render the questionnaire
     renderQuestionnaire() {
             return (
-//                <View style={styles.container}>
-//                    {this.state.questionnaireData.map((item) => (
-//                        <View key={item.id} style={styles.questionCard}>
-//                            <Text>{item.question}</Text>
-//                            {item.options.map(option => (
-//                                <Button
-//                                    key={option}
-//                                    title={option}
-//                                    onPress={() => this.handleQuestionnaireResponse(item.id, option)}
-//                                />
-//                            ))}
-//                        </View>
-//                    ))}
-//                </View>
                 <View style={styles.containerVideoCall}>
                 <Questionnaire
                      data={this.state.questionnaireData}
                      onClose={() => this.setState({ showQuestionnaire: false })}
                 />
                 </View>
+//                <ImageBackground
+//                        source={require('./img/containerQuestionnaire.png')} // Path to your background image
+//                        style={styles.containerQuestionnaire}
+//                      >
+//                    <Questionnaire
+//                      data={this.state.questionnaireData}
+//                      onClose={() => this.setState({ showQuestionnaire: false })}
+//                    />
+//                  </ImageBackground>
             );
     }
 
@@ -721,7 +1058,7 @@ export default class App extends Component<Props> {
             this.purchaseErrorSubscription = null;
         }
 
-        if (Platform.OS === 'android') {
+        if (Platform.OS === 'android' && this.backHandler) {
             this.backHandler.remove();
         }
     }
@@ -1111,6 +1448,17 @@ function Badge(o) {
 }
 
 const styles = new StyleSheet.create({
+    option: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+      },
+  optionText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+
     webview: {
         flex: 1,
         backgroundColor: 'transparent',
@@ -1121,11 +1469,102 @@ const styles = new StyleSheet.create({
         alignItems: 'center',
     },
 
-    scrollViewContent: {
+     sidePrompt: {
+            fontSize: 14,
+            color: 'gray',
+            marginBottom: 20,
+        },
+    checkbox: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+            borderColor: 'black',
+            color: 'black', // Icon color when checked
+        },
+
+    checkedCheckbox: {
+        backgroundColor: 'black', // Black fill color when checked
+        borderColor: 'black', // Optional: to keep the border black when checked
+      },
+
+
+    searchOption: {
+            padding: 10,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            borderRadius: 5,
+            marginBottom: 10,
+        },
+        backButton: {
+                backgroundColor: 'white',
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 5,
+                alignSelf: 'flex-start',
+            },
+            backButtonText: {
+                color: 'black',
+                fontSize: 16,
+            },
+            continueButton: {
+                backgroundColor: 'black',
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 5,
+                alignSelf: 'center',
+            },
+            continueButtonText: {
+               color: 'white',
+               fontSize: 16,
+            },
+
+//    scrollViewContent: {
+//        flexGrow: 1,
+//        backgroundColor: '#FFFFFF',
+//        justifyContent: 'center', // Optional: Center content if desired
+//    },
+    scrollContainer: {
         flexGrow: 1,
-        backgroundColor: '#FFFFFF',
-        justifyContent: 'center', // Optional: Center content if desired
+        justifyContent: 'center',
     },
+
+     label: {
+        fontSize: 18,
+        marginBottom: 10,
+     },
+
+     input: {
+         borderWidth: 1,
+         borderColor: '#ccc',
+         borderRadius: 5,
+         padding: 10,
+         fontSize: 18,
+         backgroundColor: 'white',
+         marginBottom: 20,
+     },
+
+     buttonContainer: {
+         flexDirection: 'row',
+         justifyContent: 'space-between',
+     },
+
+     navButton: {
+         backgroundColor: '#007bff',
+         padding: 10,
+         borderRadius: 5,
+     },
+     submitButton: {
+         backgroundColor: 'black',
+         paddingVertical: 10,
+         paddingHorizontal: 20,
+         borderRadius: 5,
+         alignSelf: 'center',
+     },
+     buttonText: {
+         color: '#fff',
+         fontSize: 18,
+     },
+
 
     header: {
         height: 50,
@@ -1195,8 +1634,10 @@ const styles = new StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: '#F5FCFF'
+//        backgroundColor: '#F5FCFF',
+        padding: 20
     },
+
 
     card: {
         flex: 1,
